@@ -32,6 +32,7 @@ const initMainState = {
   langPack: lang.tc,
   curBook: null,
   navTitle: null,
+  navbarCover: 0,
 }
 
 // ============================================
@@ -75,6 +76,11 @@ export function main(state = initMainState, action) {
       return {
         ...state,
         navTitle: action.navTitle,
+      };
+    case 'main setNavbarCover': 
+      return {
+        ...state,
+        navbarCover: action.navbarCover
       };
     default:
       return state;
@@ -182,4 +188,11 @@ export function setNavTitle(title) {
     type: 'main setNavTitle',
     navTitle: title,
   };
+}
+
+export function setNavbarCover(navbarCover) {
+  return {
+    type: 'main setNavbarCover', 
+    navbarCover: navbarCover,
+  }
 }

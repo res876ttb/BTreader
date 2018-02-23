@@ -65,7 +65,7 @@ class ChapterList extends React.Component {
     if (this.props.chapterState !== 0 && this.props.currentChapter != 0 && !this.state.preventUpdate) {
       var currentChapter = document.getElementById(this.props.currentChapter);
       var parent = document.getElementById('chapterlist-items');
-      parent.scrollTop = currentChapter.offsetTop - 60;
+      parent.scrollTop = currentChapter.offsetTop - parent.offsetHeight / 2 + 20;
       currentChapter.style.color = 'rgb(0, 101, 184)';
       if (this.state.prevChapter !== this.props.currentChapter) {
         var previousChapter = document.getElementById(this.state.prevChapter);

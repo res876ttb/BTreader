@@ -28,11 +28,12 @@ import '../styles/Navigator.css';
 // react components
 class Navigator extends React.Component {
   static propTypes = {
-    dispatch:   PropTypes.func,
-    langPack:   PropTypes.object,
-    menuExpand: PropTypes.bool,
-    navTitle:   PropTypes.any,
-    navigator:  PropTypes.string,
+    dispatch:    PropTypes.func,
+    langPack:    PropTypes.object,
+    menuExpand:  PropTypes.bool,
+    navTitle:    PropTypes.any,
+    navigator:   PropTypes.string,
+    navbarCover: PropTypes.number,
   }
 
   constructor(props) {
@@ -67,6 +68,12 @@ class Navigator extends React.Component {
               </div>
             </div>
           </div>
+          <div className={
+            this.props.navbarCover === 1 ? 'nav-menubar-cover fadein' : 
+            this.props.navbarCover === 2 ? 'nav-menubar-cover' :
+            this.props.navbarCover === 3 ? 'nav-menubar-cover fadeout' : 
+            'nav-menubar-cover hide'
+          }></div>
         </div>
 
         {/* menu button */}
@@ -75,6 +82,12 @@ class Navigator extends React.Component {
           onClick={this.handleMenuClick}
         >
           <div id='nav-menu' className='fas fa-bars'></div>
+          <div className={
+            this.props.navbarCover === 1 ? 'nav-menu-cover fadein' : 
+            this.props.navbarCover === 2 ? 'nav-menu-cover' : 
+            this.props.navbarCover === 3 ? 'nav-menu-cover fadeout' :
+            'nav-menu-cover hide'
+          }></div>
         </div>
       </div>
     );
@@ -90,8 +103,9 @@ class Navigator extends React.Component {
 }
 
 export default connect (state => ({
-  langPack:   state.main.langPack,
-  menuExpand: state.setting.menuExpand,
-  navTitle:   state.main.navTitle,
-  navigator:  state.main.navigator,
+  langPack:    state.main.langPack,
+  menuExpand:  state.setting.menuExpand,
+  navTitle:    state.main.navTitle,
+  navigator:   state.main.navigator,
+  navbarCover: state.main.navbarCover,
 }))(Navigator);

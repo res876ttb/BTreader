@@ -17,6 +17,7 @@ import {
   setNavigator,
   setCurBook,
   setNavTitle,
+  setNavbarCover,
 } from '../states/mainState.js';
 
 // ============================================
@@ -39,10 +40,13 @@ class Reading extends React.Component {
     navigator: PropTypes.string,
     preNavigator: PropTypes.string,
     menuExpand: PropTypes.bool,
+    langPack: PropTypes.object,
   }
 
   constructor(props) {
     super(props);
+
+    this.lang = this.props.langPack.Reading;
 
     this.checkIfLoading = this.checkIfLoading.bind(this);
     this.jumpToChapter = this.jumpToChapter.bind(this);
@@ -80,6 +84,8 @@ class Reading extends React.Component {
       // 0 for close; 1 for opening animation; 2 for open; 3 for closing animation
       addBookmarkState: 0, // for displaying animation of adding bookmark
       // 0 for close; 1 for sliding in; 2 for sliding out
+
+      noRecent: false,
     };
   }
 
@@ -91,15 +97,29 @@ class Reading extends React.Component {
     this.updateScrollTop();
   }
 
-  componentDidUpdate() {
-    if (this.state.bookTitle !== this.props.book.bookTitle) {
-      console.log('Reading book is changed!');
-      this.initReading();
-    } 
-    this.updateScrollTop();
+  componentDidUpdate() { 
+    if (this.props.book !== undefined && this.props.book !== null) {
+      if (this.state.bookTitle !== this.props.book.bookTitle) {
+        console.log('Reading book is changed!');
+        this.initReading();
+      } else {
+        this.updateScrollTop();
+      }
+    }
   }
 
   render() {
+    if (this.state.noRecent) {
+      return (
+        <div className='reading-out'>
+          <div className='reading-norecent container'>
+            <div className='reading-norecent-in'>
+              <span>{this.lang.norecent}</span>
+            </div>           
+          </div>
+        </div>
+      )
+    }
     return (
       <div className='reading-out'>
         <div 
@@ -166,21 +186,22 @@ class Reading extends React.Component {
   updateScrollTop() {
     if (this.state.scrollInit === false) {
       var scrollbox = document.getElementById('reading-scrollbox');
-      var offset = document.getElementById('reading-content-head').scrollHeight + 
+      var firstComponent = document.getElementById('reading-content-head');
+      if (scrollbox === null || firstComponent === null) return;
+      var offset = firstComponent.scrollHeight + 
                    (this.props.book.currentChapterOrder === 0 ? 0 : 40);
       scrollbox.scrollTop = offset;
-      setTimeout(() => {
-        this.setState({scrollInit: true});
-      }, 10);
+      this.setState({scrollInit: true});
     }
   }
 
   initReading() {
     if (this.props.book === null || this.props.book === undefined) {
       console.log(this.props.book);
-      this.props.dispatch(setNavigator(this.props.preNavigator));
+      this.setState({noRecent: true});
     } else {
-
+    
+    this.setState({noRecent: false});
     var index, content = ['','',''];
     index = readIndex(this.props.book);
     if (index === null) {
@@ -419,8 +440,10 @@ class Reading extends React.Component {
     }));
     setTimeout(() => {
       this.setState({chapterState: 3});
+      this.props.dispatch(setNavbarCover(3));
       setTimeout(() => {
         this.setState({chapterState: 0});
+        this.props.dispatch(setNavbarCover(0));
       }, 300);
       this.initReading();
       this.updateScrollTop();
@@ -430,13 +453,17 @@ class Reading extends React.Component {
   handleChapterButtonClick() {
     if (this.state.chapterState === 0) {
       this.setState({chapterState: 1});
+      this.props.dispatch(setNavbarCover(1));
       setTimeout(() => {
         this.setState({chapterState: 2});
+        this.props.dispatch(setNavbarCover(2));
       }, 300);
     } else if (this.state.chapterState === 2) {
       this.setState({chapterState: 3});
+      this.props.dispatch(setNavbarCover(3));
       setTimeout(() => {
         this.setState({chapterState: 0});
+        this.props.dispatch(setNavbarCover(0));
       }, 300);
     }
   }
@@ -463,4 +490,5 @@ export default connect (state => ({
   navigator:    state.main.navigator,
   preNavigator: state.main.preNavigator,
   menuExpand:   state.setting.menuExpand,
+  langPack:     state.main.langPack,
 }))(Reading);

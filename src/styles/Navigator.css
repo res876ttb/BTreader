@@ -8,6 +8,7 @@
   background-color: white;
   transition-duration: 300ms;
   padding: 10px;
+  overflow: hidden;
 }
 
 #nav-menu-out:hover {
@@ -35,6 +36,7 @@
   background-color: white;
   transition-duration: 300ms;
   padding: 7px;
+  overflow: hidden;
 }
 
 #nav-menu-out-float:hover {
@@ -101,4 +103,23 @@
 
 .nav-title-hide {
   opacity: 0;
+}
+
+/* navbar cover */
+.nav-menubar-cover {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.nav-menu-cover {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  background-color: rgba(0, 0, 0, 0.2);
 }

@@ -170,6 +170,13 @@ export function addOnlineBook(url, bookTitle, author, fontSize) {
   };
 }
 
+export function updateBook(book) {
+  return {
+    type: 'library updateBook',
+    book: book, 
+  };
+} 
+
 export function deleteBooks(bookPaths) {
   return {
     type: 'library deleteBooks',

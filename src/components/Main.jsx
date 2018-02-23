@@ -77,7 +77,7 @@ class Main extends React.Component {
         {this.state.dataLoaded1 === false ?
           <div className='main-loading ns loading-normal'>Better Text Reader</div> : 
           this.state.dataLoaded2 === false ?
-            <div className='main-loading ns loading-hide'  >Better Text Reader</div> :
+            <div className='main-loading ns loading-hide'>Better Text Reader</div> :
             <div></div> 
         }
 
