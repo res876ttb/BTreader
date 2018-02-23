@@ -1,0 +1,53 @@
+/* LibraryItem.css */
+.libraryItem {
+  text-align: center;
+  display: inline-block; 
+}
+
+.libraryItem-title {
+  font-size: 20px;
+  line-height: 30px;
+  overflow: hidden;
+  height: 60px;
+  text-align: center;
+  border-radius: 8px;
+  transition-duration: 200ms;
+}
+
+.libraryItem-select {
+  color: rgb(216, 0, 0);
+}
+
+.libraryItem-cover {
+  background: rgba(255, 255, 255, 1.0);
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4);
+  transition: 0.3s;
+  width: 200px;
+  height: 160px; 
+  border-radius: 4px;
+  margin: 10px;
+  padding: 10px 0px; 
+}
+
+.libraryItem-cover:hover {
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.5);
+}
+
+.libraryItem-author {
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+}
+
+.libraryItem-property {
+  font-size: 14px;
+  overflow: hidden;
+  height: 21px;
+  text-align: left;
+}
+
+.libraryItem-lastRead {
+  font-size: 10px;
+  color: #888;
+  text-align: left;
+}

@@ -1,0 +1,135 @@
+/* ChapterList.css */
+
+.chapterlist-out {
+  position: fixed;
+  bottom: 0px;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  display: flex;
+  justify-content: center;
+
+  transition-duration: 400ms;
+}
+
+.chapterlist-cover {
+  position: absolute;
+  bottom: 0px;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  z-index: 1;
+  background:rgba(0, 0, 0, 0.2);
+}
+
+.chapterlist-main {
+  position: absolute;
+  width: 400px;
+  top: 100px;
+  bottom: 100px;
+  max-height: 600px;
+  background: rgba(255, 255, 255, 0.87);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  z-index: 2;
+}
+
+.chapterlist-title {
+  margin: 30px 2rem 0px 2rem;
+  font-size: 28px;
+  text-align: center;
+}
+
+.chapterlist-items {
+  position: absolute;
+  top: 75px;
+  left: 40px;
+  right: 40px;
+  bottom: 35px;
+  overflow-y: scroll;
+}
+
+.chapterlist-chapteritem {
+  padding: 7px 10px;
+  transition-duration: 200ms;
+}
+.chapterlist-chapteritem:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+.chapterlist-chapteritem:active {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.chapterlist-chapteritem-sep {
+  height: 2px;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.05));
+}
+
+.chapterlist-nochapter {
+  position: absolute;
+  top: 80px;
+  left: 40px;
+  right: 40px;
+  bottom: 30px;
+  text-align: center;
+}
+
+.chapterlist-closebutton {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 20px;
+  height: 20px;
+  color: black;
+  transition-duration: 200ms;
+  font-size: 16px;
+}
+
+.chapterlist-closebutton:hover {
+  color: rgb(209, 23, 23);
+}
+
+/* chapter list animation */
+@keyframes a-chapterlist-movein {
+  from {top: 50px;  opacity: 0; bottom: 150px;}
+  to   {top: 100px; opacity: 1; bottom: 100px;}
+}
+
+@keyframes a-chapterlist-moveout {
+  from {top: 100px; opacity: 1; bottom: 100px;}
+  to   {top: 50px;  opacity: 0; bottom: 150px;}
+}
+
+@keyframes a-fadein {
+  from {opacity: 0;}
+  to   {opacity: 1;}
+}
+
+@keyframes a-fadeout {
+  from {opacity: 1;}
+  to   {opacity: 0;}
+}
+
+.chapterlist-movein {
+  animation: a-chapterlist-movein 300ms;
+  animation-fill-mode: forwards;
+}
+
+.chapterlist-moveout {
+  animation: a-chapterlist-moveout 300ms;
+  animation-fill-mode: forwards;
+}
+
+.fadein {
+  animation: a-fadein 300ms;
+  animation-fill-mode: forwards;
+}
+
+.fadeout {
+  animation: a-fadeout 300ms;
+  animation-fill-mode: forwards;
+}
+
+.hide {
+  display: none;
+}

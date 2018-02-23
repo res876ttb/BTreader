@@ -1,0 +1,185 @@
+/* Main.css */
+* {
+  -webkit-user-select: none;  
+  -moz-user-select: none;    
+  -ms-user-select: none;      
+  user-select: none;
+}
+
+/* disable scrollbar */
+::-webkit-scrollbar {
+  display: none;
+}
+
+html {
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+
+/* no selection */
+.ns {
+	-webkit-touch-callout: none;  /* iOS Safari */
+    -webkit-user-select: none;  /* Safari */
+     -khtml-user-select: none;  /* Konqueror HTML */
+       -moz-user-select: none;  /* Firefox */
+        -ms-user-select: none;  /* Internet Explorer/Edge */
+            user-select: none;  /* Non-prefixed version, currently
+                                   supported by Chrome and Opera */
+}
+
+#root {
+  height: 100vh;
+  background-color: rgb(212, 212, 212);
+}
+
+/* .blur {
+  position: relative;
+  background: rgba(255,255,255,0.2);
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  overflow: hidden;
+} */
+
+/* .blur:after {
+  z-index: -1;
+  content: '';
+  position: absolute; 
+  top: 0; 
+  left: 0; 
+  right: 0; 
+  bottom: 0; 
+  background-image: url('image/background.jpeg');
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat; 
+  background-size: cover;
+  margin: -30px;
+  filter: blur(12px);
+} */
+
+.anishadow-mini {
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4);
+}
+.anishadow-mini:hover {
+  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.4);
+}
+
+.anishadow {
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+}
+.anishadow:hover {
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.5);
+}
+
+.stashadow-mini {
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.stashadow {
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+/********** Loading Animation **********/
+.main-loading {
+  background: #FFFFFF;
+  padding: auto;
+  text-align: center;
+  line-height: 100vh;
+  font-size: 60px;
+  transition-duration: 1s;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+
+.loading-normal {
+  color: royalblue;
+}
+
+.loading-hide {
+  opacity: 0;
+}
+
+/********** canvas **********/
+@keyframes canvas-toleft-a {
+  from {left: 0px;}
+  to {left: -100%;}
+}
+
+@keyframes canvas-toright-a {
+  from {left: 0px;}
+  to {left: 100%;}
+}
+
+@keyframes canvas-center-toleft-a {
+  from {left: 100%;}
+  to {left: 0px;}
+}
+
+@keyframes canvas-center-toright-a {
+  from {left: -100%;}
+  to {left: 0px;}
+}
+
+#canvas {
+  position: fixed;
+  transition-duration: 400ms;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  overflow: scroll;
+}
+
+.canvas-center {
+  position: fixed; 
+  transition-duration: 500ms;
+  max-height: 100%;
+  overflow: scroll;
+}
+
+.canvas-toleft {
+  position: fixed;
+  transition-duration: 500ms;
+  width: 100%;
+  animation: canvas-toleft-a 0.5s;
+  animation-fill-mode: forwards;
+  /* z-index: 2; */
+}
+
+.canvas-toright {
+  position: fixed;
+  transition-duration: 500ms;
+  width: 100%;
+  animation: canvas-toright-a 0.5s;
+  animation-fill-mode: forwards;
+  /* z-index: 2; */
+}
+
+.canvas-center-toleft {
+  width: 100%;
+  animation: canvas-center-toleft-a 0.5s;
+  animation-fill-mode: forwards;
+  /* z-index: 1; */
+}
+
+.canvas-center-toright {
+  width: 100%;
+  animation: canvas-center-toright-a 0.5s;
+  animation-fill-mode: forwards;
+  /* z-index: 1; */
+}
+
+/********** Show current book title **********/
+.main-showReadingBook {
+  text-align: center;
+  width: 200px;
+  overflow: hidden;
+  margin-left: auto;
+  overflow: hidden;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 5px;
+  background: rgb(240, 240, 240);
+  color: rgb(124, 124, 124);
+}

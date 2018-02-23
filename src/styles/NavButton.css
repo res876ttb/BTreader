@@ -1,0 +1,45 @@
+.nav-button-out {
+  display: inline-block;
+  height: 40px;
+}
+
+.nav-button-inner {
+  height: 36px;
+  padding-top: 10px;
+  padding-bottom: 6px;
+} 
+
+.nav-button {
+  padding: 0px 10px;
+  line-height: 20px;
+}
+
+.nav-button-bottom {
+  transition-duration: 200ms;
+  height: 4px;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  width: 0%;
+  opacity: 0;
+}
+
+.nav-button-bottom-hover {
+  transition-duration: 200ms;
+  height: 4px;
+  position: relative;
+  background-color: #1fc0ff;
+  left: 0px;
+  right: 0px;
+  width: 100%;
+}
+
+.nav-button-bottom-select {
+  transition-duration: 200ms;
+  height: 4px;
+  position: relative;
+  background-color: #1cdab0;
+  left: 50%;
+  width: 20px;
+  margin: 0 0 0 -10px;
+}

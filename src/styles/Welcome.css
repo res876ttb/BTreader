@@ -1,0 +1,33 @@
+/* Welcome.css */
+.welcome-main {
+  min-height: 200px;  
+
+  color: white;
+  text-align: center;
+  overflow: hidden;
+}
+
+.welcome-jumbotron {
+  margin: 2rem 1rem 2rem 1rem;
+  padding: 1rem 2rem 1rem 2rem;
+  border-radius: 10px;
+  background-color: rgb(206, 192, 131);
+}
+
+.welcome-jumbotron-title {
+  font-size: 48px;
+}
+
+.welcome-jumbotron-content {
+  font-size: 20px;
+}
+
+.welcome-buttons {
+   margin: 0.5rem; 
+}
+
+@media (min-width: 990px) {
+  .welcome-main {
+    max-width: 720px !important;
+  }
+}
