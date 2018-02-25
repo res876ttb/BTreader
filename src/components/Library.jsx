@@ -17,7 +17,7 @@ import LibraryItem from './LibraryItem.jsx';
 // ============================================
 // import react redux-action
 import {
-  setSortby
+  setSortby,
 } from '../states/settingState.js';
 
 // ============================================
@@ -42,6 +42,8 @@ class Library extends React.Component {
     books: PropTypes.object,
     lang: PropTypes.string,
     fontSize: PropTypes.number,
+    navigator: PropTypes.string,
+    lineHeight: PropTypes.number,
   }
 
   constructor(props) {
@@ -146,7 +148,7 @@ class Library extends React.Component {
       books.push((
         <LibraryItem 
           key={'libraryItem' + String(i)}
-          book={this.props.books[libraryKeys[i]]}
+          bookPath={libraryKeys[i]}
           edit={this.state.edit}
           select={this.state.select.indexOf(libraryKeys[i]) > -1}
           handleAddSelect={this.handleAddSelect}
@@ -203,6 +205,7 @@ class Library extends React.Component {
   }
 
   handleDelete() {
+    var select = this.state.select.slice();
     this.props.dispatch(deleteBooks(this.state.select));
     this.setState({select: [], edit: false});
   }
@@ -211,13 +214,13 @@ class Library extends React.Component {
     var paths = newLocal();
     this.setState({select: [], edit: false});
     for (var i in paths) {
-      var path = paths[i];
-      var bookTitle = path.split('/').pop().split('\\').pop().split('.')[0];
+      let path = paths[i];
+      let bookTitle = path.split('/').pop().split('\\').pop().split('.')[0];
       if (this.isBookExists(bookTitle) === false) {
         processLocal(path, bookTitle, this.props.lang).then(v => {
           let bookPath = v.bookPath;
           let totalChapter = v.totalChapter;
-          this.props.dispatch(addLocalBook(bookPath, bookTitle, this.props.fontSize, totalChapter));
+          this.props.dispatch(addLocalBook(bookPath, bookTitle, this.props.fontSize, this.props.lineHeight, totalChapter));
         }).catch(err => {
           console.error(err);
         });
@@ -259,9 +262,11 @@ class Library extends React.Component {
 }
 
 export default connect (state => ({
-  sortby:   state.setting.sortby,
-  langPack: state.main.langPack,
-  books:    state.library.books,
-  lang:     state.setting.lang,
-  fontSize: state.setting.fontSize,
+  sortby:     state.setting.sortby,
+  langPack:   state.main.langPack,
+  books:      state.library.books,
+  lang:       state.setting.lang,
+  fontSize:   state.setting.fontSize,
+  lineHeight: state.setting.lineHeight,
+  navigator:  state.main.navigator,
 }))(Library);

@@ -31,7 +31,8 @@ class LibraryItem extends React.Component {
     dispatch: PropTypes.func,
     edit: PropTypes.bool,
     select: PropTypes.bool,
-    book: PropTypes.object,
+    bookPath: PropTypes.string,
+    books: PropTypes.object,
     handleAddSelect: PropTypes.func,
     langPack: PropTypes.object,
   }
@@ -49,21 +50,22 @@ class LibraryItem extends React.Component {
   }
 
   render() {
-    var lastReadTime = this.getLastReadTime(this.props.book.lastReadTime);
+    var book = this.props.books[this.props.bookPath];
+    var lastReadTime = this.getLastReadTime(book.lastReadTime);
     return (
       <div className='libraryItem'>
         <div className='libraryItem-cover' onClick={this.handleSelect}>
           <div className='container'>
             <div className={this.props.select === true && this.props.edit === true ?
               'libraryItem-title libraryItem-select' : 'libraryItem-title'}>
-              {this.props.book.bookTitle}
+              {book.bookTitle}
             </div>
 
             <div style={{height: '1px', backgroundColor: '#bbb', margin: '4px'}}></div>
 
-            <div className='libraryItem-author'>{this.lang.author}{this.props.book.author === 'unknown' ? this.lang.authorUnknown : this.props.book.author}</div>
-            <div className='libraryItem-property'>{this.lang.currentChapter} {this.props.book.currentChapterOrder !== -1 ? ' (' + String(this.props.book.currentChapterOrder) + '/' + String(this.props.book.totalChapter) + ')' : ''}</div>
-            <div className='libraryItem-property'>{this.props.book.currentChapter === -1 ? this.lang.unread : this.props.book.currentChapter}</div>
+            <div className='libraryItem-author'>{this.lang.author}{book.author === 'unknown' ? this.lang.authorUnknown : book.author}</div>
+            <div className='libraryItem-property'>{this.lang.currentChapter} {book.currentChapterOrder !== -1 ? ' (' + String(book.currentChapterOrder) + '/' + String(book.totalChapter - 1) + ')' : ''}</div>
+            <div className='libraryItem-property'>{book.currentChapter === -1 ? this.lang.unread : book.currentChapter}</div>
 
             <div className='libraryItem-lastRead'>{this.lang.lastRead}{lastReadTime}</div>
           </div>
@@ -75,12 +77,12 @@ class LibraryItem extends React.Component {
   handleSelect() {
     if (this.props.edit === true) {
       if (this.props.select === false) {
-        this.props.handleAddSelect(this.props.book.bookPath);
+        this.props.handleAddSelect(this.props.bookPath);
       } else {
-        this.props.handleCancleSelect(this.props.book.bookPath);
+        this.props.handleCancleSelect(this.props.bookPath);
       }
     } else {
-      this.props.dispatch(setCurBook(this.props.book));
+      this.props.dispatch(setCurBook(this.props.books[this.props.bookPath]));
       this.props.dispatch(setNavigator('/reading'));
     }
   }
@@ -100,5 +102,6 @@ class LibraryItem extends React.Component {
 }
 
 export default connect (state => ({
-  langPack: state.main.langPack
+  langPack: state.main.langPack,
+  books: state.library.books,
 }))(LibraryItem);

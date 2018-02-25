@@ -5,6 +5,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
+const {ipcRenderer} = require('electron');
 
 // ============================================
 // import react components
@@ -19,6 +20,10 @@ import {
   setNavTitle,
   setNavbarCover,
 } from '../states/mainState.js';
+import {
+  updateBook,
+  setRecentReading,
+} from '../states/libraryState.js';
 
 // ============================================
 // import apis
@@ -26,6 +31,9 @@ import {
   readChapter,
   readIndex,
 } from '../utils/fileUtilities.js';
+import {
+  getCurrentTime,
+} from '../utils/clockUtilities.js';
 
 // ============================================
 // import css file
@@ -37,10 +45,14 @@ class Reading extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func,
     book: PropTypes.object,
+    books: PropTypes.object,
     navigator: PropTypes.string,
     preNavigator: PropTypes.string,
     menuExpand: PropTypes.bool,
     langPack: PropTypes.object,
+    lineHeight: PropTypes.number,
+    fontSize: PropTypes.number,
+    recentReading: PropTypes.string,
   }
 
   constructor(props) {
@@ -70,6 +82,8 @@ class Reading extends React.Component {
       
       currentChapter: '', // current chapter
       currentChapterOrder: -1, // index of current chapter in index.chapter
+      firstChapterOrder: -1, // for loading previous chapter
+      lastChapterOrder: -1,  // for loading next chapter
       
       idArr: [], // id array for components
       currentIdArrIndex: -1, // index of id of current visible component
@@ -85,22 +99,52 @@ class Reading extends React.Component {
       addBookmarkState: 0, // for displaying animation of adding bookmark
       // 0 for close; 1 for sliding in; 2 for sliding out
 
-      noRecent: false,
+      noRecent: false, 
+
+      notSave: false, // flag for saving reading progress
+      
+      firstIsLoad: false, // flag for if first chapter is loaded. It is needed because 
+                          // checkIfLoad has some limits that cannot detected if previous
+                          // chapter is needed to be loaded when the first chapter cannot 
+                          // fill up the whole height.
     };
   }
 
+// init reading content before reading is rendered and watch on record saving signal from
+// from main process.
   componentWillMount() {
+    console.log('Reading component is going to be created!');
+    ipcRenderer.on('saveCurrentBook', (e) => {
+      this.saveBook();
+    });
     this.initReading();
   }
 
+// after rendering, set scrollOffset
   componentDidMount() {
     this.updateScrollTop();
   }
 
+// when book is changed, re-initialize reading content and set scrollOffset
   componentDidUpdate() { 
+    // if current book is not undefined, then it need to be verified if need update
     if (this.props.book !== undefined && this.props.book !== null) {
+      // if Reading is not focused, then save current book. Use notSave flag to prevent 
+      // repeating saving
+      if (this.props.preNavigator === '/reading' && this.state.notSave) {
+        this.setState({notSave: false});
+        this.saveBook();
+      }
+      if (!this.state.notSave && this.props.navigator === '/reading') {
+        this.setState({notSave: true});
+      }
+
+      // if bookTitle is change, then verify it as book is changed
       if (this.state.bookTitle !== this.props.book.bookTitle) {
         console.log('Reading book is changed!');
+        this.initReading();
+      } if (this.props.recentReading === '' && this.state.noRecent === false) {
+        console.log('Reading book is deleted!');
         this.initReading();
       } else {
         this.updateScrollTop();
@@ -126,6 +170,7 @@ class Reading extends React.Component {
           id='reading-scrollbox' 
           className='reading-main container max720' 
           onScroll={this.checkIfLoading}
+          style={{fontSize: this.props.fontSize, lineHeight: this.props.lineHeight}}
         >
           <div id='reading-prevToggle' style={{height: '40px'}}></div>
           {this.state.components}
@@ -183,21 +228,32 @@ class Reading extends React.Component {
     );
   }
 
+// set scrollOffset of reading for hiding previous chapter
   updateScrollTop() {
     if (this.state.scrollInit === false) {
       var scrollbox = document.getElementById('reading-scrollbox');
       var firstComponent = document.getElementById('reading-content-head');
+      var currentComponent = document.getElementById('reading-content-5000');
       if (scrollbox === null || firstComponent === null) return;
       var offset = firstComponent.scrollHeight + 
-                   (this.props.book.currentChapterOrder === 0 ? 0 : 40);
+                   (this.props.book.currentChapterOrder <= 0 ? 0 : 40) + 
+                   currentComponent.scrollHeight * this.props.book.scrollTop / this.props.book.scrollHeight;
+      console.log(currentComponent.scrollHeight, this.props.book.scrollTop, this.props.book.scrollHeight, this.props.book.scrollTop / this.props.book.scrollHeight);
       scrollbox.scrollTop = offset;
       this.setState({scrollInit: true});
     }
   }
 
+// read novel and create component
   initReading() {
     if (this.props.book === null || this.props.book === undefined) {
-      console.log(this.props.book);
+      console.log('Current book is not recognizable');
+      this.setState({noRecent: true});
+    
+    // check if current book exists in library
+    } else if (this.props.books[this.props.book.bookPath] === undefined) {
+      console.log('Book is removed from library!');
+      this.props.dispatch(setCurBook(null));
       this.setState({noRecent: true});
     } else {
     
@@ -213,6 +269,7 @@ class Reading extends React.Component {
     var idArr = ['reading-content-head', 'reading-content-5000', 'reading-content-tail'];
     var currentChapter  = cco == 0 ? 0 : this.props.book.currentChapter;
 
+    this.props.dispatch(setRecentReading(this.props.book.bookPath));
     this.props.dispatch(setNavTitle(currentChapter));
 
     content[0] = readChapter(this.props.book, cco, index, -1);
@@ -226,23 +283,29 @@ class Reading extends React.Component {
     ];
 
     this.setState({
-      index: index, // book index
+      index: index, 
       bookTitle: this.props.book.bookTitle,
       
-      prevContent: content[0], // content of current first chapter
-      nextContent: content[2], // content of current last chapter
+      prevContent: content[0], 
+      nextContent: content[2], 
 
-      components: components, // reading content div
-      fromBase: 0, // how many chapters are there from base chapter to last chapter
-      toBase: 0,   // how many chapters are there from first chapter to base chapter
+      components: components, 
+      fromBase: 0, 
+      toBase: 0,   
       
       currentChapter: currentChapter,
       currentChapterOrder: cco,
+      firstChapterOrder: cco > 1 ? cco - 1 : 0,
+      lastChapterOrder: cco === this.props.book.totalChapter ? cco : cco + 1,
       
       idArr: idArr,
       currentIdArrIndex: 1,
 
-      scrollInit: false, // for change current scroll offset
+      scrollInit: false, 
+
+      notSave: true,
+
+      firstIsLoad: cco <= 1 ? true : false,
     });
 
     if (this.props.book.currentChapterOrder === -1) 
@@ -252,7 +315,8 @@ class Reading extends React.Component {
         currentChapter: 0,
       }));
   }}}
-  
+
+// check if loading next chapter and checking which is current chapter
   checkIfLoading() {
     if (this.state.scrollInit === false || this.state.loadLock) return;
     var a          = document.getElementById('reading-scrollbox').scrollTop;
@@ -260,16 +324,14 @@ class Reading extends React.Component {
 
     var loadPrev = (this.state.loadLock === false) &&
                    (a === 0) &&
-                   (this.state.currentChapterOrder > 0);
+                   (this.state.firstChapterOrder > 0);
     var loadNext = (this.state.loadLock === false) &&
                    (a + window.innerHeight > tail) && 
-                   (this.state.currentChapterOrder + 1 < this.props.book.totalChapter);
+                   (this.state.lastChapterOrder + 1 < this.props.book.totalChapter);
           
     if (loadNext) this.loadNextChapter();
     else if (loadPrev) this.loadPreviousChapter();
-    else if (this.state.loadLock === false &&
-             currId !== 'reading-content-head' && 
-             currId !== 'reading-content-tail') {
+    else if (this.state.loadLock === false) {
     var ciai     = this.state.currentIdArrIndex;
     var currId   = this.state.idArr[ciai];
     var boundary = a + window.innerHeight;
@@ -309,13 +371,14 @@ class Reading extends React.Component {
     }
   }}
 
+// handle load next chapter
   loadNextChapter() {
     console.log('Load Next Chapter');
     this.setState({loadLock: true});
     var components = this.state.components.slice();
     var idArr = this.state.idArr.slice();
     var nFromBase = this.state.fromBase + 1;
-    var ncco = this.state.currentChapterOrder + 1;
+    var ncco = this.state.lastChapterOrder;
     var content = readChapter(
       this.props.book, 
       this.state.currentChapterOrder,
@@ -355,17 +418,19 @@ class Reading extends React.Component {
 
     this.setState({
       components: components,
-      currentChapter: this.state.index.chapter[ncco],
-      currentChapterOrder: ncco,
+      // currentChapter: this.state.index.chapter[ncco],
+      // currentChapterOrder: ncco,
+      lastChapterOrder: ncco + 1,
       fromBase: nFromBase,
       idArr: idArr,
-      currentIdArrIndex: this.state.currentIdArrIndex + 1,
+      // currentIdArrIndex: this.state.currentIdArrIndex + 1,
       loadLock: false,
       nextContent: content, 
     });
-    this.props.dispatch(setNavTitle(this.state.index.chapter[ncco]));
+    // this.props.dispatch(setNavTitle(this.state.index.chapter[ncco]));
   }
 
+// load previous page
   loadPreviousChapter() {
     console.log('Load Previous Chapter');
     this.setState({loadLock: true});
@@ -373,7 +438,7 @@ class Reading extends React.Component {
     var components = this.state.components.slice();
     var idArr = this.state.idArr.slice();
     var nToBase = this.state.toBase + 1;
-    var ncco = this.state.currentChapterOrder - 1;
+    var ncco = this.state.firstChapterOrder - 1;
     var content = readChapter(
       this.props.book, 
       this.state.currentChapterOrder,
@@ -413,13 +478,17 @@ class Reading extends React.Component {
 
     this.setState({
       components: components,
-      currentChapter: this.state.index.chapter[ncco],
-      currentChapterOrder: ncco,
+      // currentChapter: this.state.index.chapter[ncco],
+      // currentChapterOrder: ncco,
+      firstChapterOrder: ncco,
       toBase: nToBase,
       idArr: idArr,
       prevContent: content, 
+      firstIsLoad: ncco === 0,
+
+      currentIdArrIndex: this.state.currentIdArrIndex + 1,
     });
-    this.props.dispatch(setNavTitle(this.state.index.chapter[ncco]));
+    // this.props.dispatch(setNavTitle(this.state.index.chapter[ncco]));
 
     setTimeout(() => {
       var scrollbox = document.getElementById('reading-scrollbox');
@@ -429,6 +498,7 @@ class Reading extends React.Component {
     }, 10);
   }
 
+// jump to certain chapter
   jumpToChapter(chapter, chapterOrder) {
     console.log('jump to', chapter);
     this.props.dispatch(setCurBook({
@@ -450,6 +520,7 @@ class Reading extends React.Component {
     }, 1);
   }
 
+// handle if chapterlist will display
   handleChapterButtonClick() {
     if (this.state.chapterState === 0) {
       this.setState({chapterState: 1});
@@ -468,27 +539,71 @@ class Reading extends React.Component {
     }
   }
 
+// handle is bookmark list will display
   handleBookmarkButtonClick() {
 
   }
 
+// handle add bookmark and display adding animation
   handleAddbookmarkButtonClick() {
 
   }
 
+// handle jump to certain percentage of current novel
   handleJumpButtonClick() {
 
   }
 
+// handle if search page is display
   handleSearchButtonClick() {
+    
+  }
 
+// save current book into disk
+  saveBook() {
+    if (this.props.book !== null && this.props.book !== undefined && this.state.noRecent === false) {
+      var idArr = this.state.idArr;
+      var index = this.state.currentIdArrIndex;
+      var currentEle = document.getElementById(idArr[index]);
+      var scrollbox = document.getElementById('reading-scrollbox');
+      var newScrollTop = scrollbox.scrollTop - currentEle.offsetTop + 64; // TODO: why need to add 64 for offset?
+      var savingBook = {
+        ...this.props.book,
+        currentChapter: this.state.currentChapter,
+        currentChapterOrder: this.state.currentChapterOrder,
+        scrollTop: newScrollTop < 0 ? 0 : newScrollTop,
+        scrollHeight: currentEle.scrollHeight,
+        lastReadTime: getCurrentTime(),
+      };
+      this.props.dispatch(updateBook(savingBook));
+      this.props.dispatch(setCurBook(savingBook));
+    }
   }
 }
 
 export default connect (state => ({
-  book:         state.main.curBook,
-  navigator:    state.main.navigator,
-  preNavigator: state.main.preNavigator,
-  menuExpand:   state.setting.menuExpand,
-  langPack:     state.main.langPack,
+  book:          state.main.curBook,
+  books:         state.library.books,
+  navigator:     state.main.navigator,
+  preNavigator:  state.main.preNavigator,
+  menuExpand:    state.setting.menuExpand,
+  langPack:      state.main.langPack,
+  lineHeight:    state.setting.lineHeight,
+  fontSize:      state.setting.fontSize,
+  recentReading: state.library.recentReading,
 }))(Reading);
+
+/* bookmark format:
+bookmark: [
+  {
+    currentChapter: string,
+    currentChapterOrder: number,
+    offsetTop: number,
+    scrollHeight: number,
+    content: string,
+    addTime: [year, month, day, hour, minute, second],
+    progress: number, // percentage of whole book
+  }, {
+  ...
+]
+*/

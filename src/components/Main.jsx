@@ -23,12 +23,22 @@ import {
   setHostType,
   setNavigator,
   setLangPack,
+  setCurBook,
 } from '../states/mainState.js';
+import {
+  libraryInitData,
+  libraryLoadData,
+} from '../states/libraryState.js';
+import {
+  settingInitData,
+  settingLoadData,
+} from '../states/settingState.js';
 
 // ============================================
 // import apis
 import {
   getCurPath,
+  dataExists,
 } from '../utils/fileUtilities.js';
 
 // ============================================
@@ -47,25 +57,42 @@ class Main extends React.Component {
     windowHeight:     PropTypes.number,
     windowWidth:      PropTypes.number,
     navbarExpand:     PropTypes.bool,
+    recentReading:    PropTypes.string,
+    books:            PropTypes.object,
   }
 
   constructor(props) {
     super(props);
 
-    this.getMainComponent = this.getMainComponent.bind(this);
-
     this.state = {
-      debug: true,
-      dataLoaded1: false,
-      dataLoaded2: false,
+      debug: false,
+      dataLoaded1: false, // true when data is loaded
+      dataLoaded2: false, // true after animation has finished
     };
   }
 
   componentWillMount() {
+    // get application path
     getCurPath();
 
-    this.loadData();
+    // load data from application path
+    this.loadData().then(() => {
+      // after data is loaded, display loading animation
+      if (this.state.debug) {
+        this.setState({dataLoaded1: true, dataLoaded2: true});
+        // this.props.dispatch(setNavigator('/library'));
+      } else {
+        // use setTimeout on the outter layer is for making it synchronous.
+        setTimeout(() => {
+          this.setState({dataLoaded1: true});
+          setTimeout(() => {
+            this.setState({dataLoaded2: true});
+          }, 777);
+        }, 1);
+      }
+    });
 
+    // set application language
     this.props.dispatch(setLangPack(this.props.lang));
   }
 
@@ -74,15 +101,16 @@ class Main extends React.Component {
     return (
       <div>
         {/* Program cover for loading data */}
-        {this.state.dataLoaded1 === false ?
-          <div className='main-loading ns loading-normal'>Better Text Reader</div> : 
-          this.state.dataLoaded2 === false ?
-            <div className='main-loading ns loading-hide'>Better Text Reader</div> :
-            <div></div> 
-        }
+        <div className={
+          this.state.dataLoaded1 === false ? 'main-loading ns loading-normal' :
+          this.state.dataLoaded2 === false ? 'main-loading ns loading-fadout' : 
+          'main-loading ns loading-hide'
+        }>
+          Better Text Reader
+        </div>
 
         {/* Main screen */}
-        <div id='canvas' style={{top: this.props.navbarExpand === true ? '40px' : '0px'}}>
+        <div id='canvas' style={{top: this.props.navbarExpand ? '40px' : '0px'}}>
           {mainComponent}
         </div>
 
@@ -92,22 +120,38 @@ class Main extends React.Component {
     );
   }
 
+// load library and setting data from disk
   loadData() {
-    // simulate data load timing
-    if (this.state.debug === true) {
-      this.setState({dataLoaded1: true});
-      this.setState({dataLoaded2: true});
-      this.props.dispatch(setNavigator('/library'));
-    } else {
-      setTimeout(() => {
-        this.setState({dataLoaded1: true});
-        setTimeout(() => {
-          this.setState({dataLoaded2: true});
-        }, 1000)
-      }, 500);
-    }
+    var loading = new Promise((res, rej) => {
+      var libraryloaded = false;
+      var settingloaded = false;
+      if (dataExists(window.appPath, 'library')) {
+        this.props.dispatch(libraryLoadData());
+        libraryloaded = true;
+        if (settingloaded && libraryloaded) res();
+      } else {
+        this.props.dispatch(libraryInitData());
+        libraryloaded = true;
+        if (settingloaded && libraryloaded) res();
+      }
+      if (dataExists(window.appPath, 'setting')) {
+        this.props.dispatch(settingLoadData());
+        settingloaded = true;
+        if (settingloaded && libraryloaded) res();
+      } else {
+        this.props.dispatch(settingInitData());
+        settingloaded = true;
+        if (settingloaded && libraryloaded) res();
+      }
+    }).then(() => { // set curBook
+      if (this.props.recentReading !== '') {
+        this.props.dispatch(setCurBook(this.props.books[this.props.recentReading]));
+      }
+    });
+    return loading;
   }
 
+// For render component.
   getMainComponent() {
     // map navigator into number such that we can get which direction
     // animation should be.
@@ -158,6 +202,7 @@ class Main extends React.Component {
     return mainComponent;
   }
 
+// get actual component.
   getComponent(c) {
     switch (c) {
       case '/':
@@ -177,6 +222,7 @@ class Main extends React.Component {
 }
 
 export default connect (state => ({
+  curBook:          state.main.curBook,
   host:             state.main.host,
   navigator:        state.main.navigator,
   navDirection:     state.main.navDirection,
@@ -185,4 +231,6 @@ export default connect (state => ({
   windowWidth:      state.main.windowWidth,
   lang:             state.setting.lang,
   navbarExpand:     state.setting.menuExpand,
+  recentReading:    state.library.recentReading,
+  books:            state.library.books,
 }))(Main);

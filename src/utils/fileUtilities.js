@@ -121,20 +121,34 @@ export function processLocal(path, bookTitle, lang) {
     let chapterList = v.chapterList;
     console.log(v);
     let addPath = Path.resolve(appPath, bookTitle);
-    let indexFilePath = Path.resolve(appPath, bookTitle + '.json');
+    let indexFilePath = Path.resolve(appPath, bookTitle + '-index.json');
+    let bookmarkFilePath = Path.resolve(appPath, bookTitle + '-bookmark.json');
+
+    // if file already exist, remove it
     if (fs.existsSync(addPath) === true) {
       fs.removeSync(addPath);
     }
     if (fs.existsSync(indexFilePath) === true) {
       fs.removeSync(indexFilePath);
     }
+    if (fs.existsSync(bookmarkFilePath) === true) {
+      fs.removeSync(bookmarkFilePath);
+    }
+
+    // create folder 
     fs.mkdirSync(addPath);
-    jf.writeFileSync(indexFilePath, {chapter: chapterList, bookmark: []});
+
+    // write chapter and index into disk
+    jf.writeFileSync(indexFilePath, {chapter: chapterList});
+    jf.writeFileSync(bookmarkFilePath, {bookmark: []});
+
+    // write content into the folder just created
     for (var i in content) {
       fs.writeFileSync(Path.resolve(addPath, chapterList[i]), content[i]);
     }
+
     return {
-      bookPath: indexFilePath, 
+      bookPath: Path.resolve(appPath, bookTitle), 
       totalChapter: chapterList.length
     };
   }).catch(err => {
@@ -144,24 +158,47 @@ export function processLocal(path, bookTitle, lang) {
 
 export function deleteBook(book) {
   var folderPath = Path.resolve(window.appPath, book.bookTitle);
-  var indexFilePath = folderPath + '.json';
+  var indexFilePath = folderPath + '-index.json';
+  var bookmarkFilePath = folderPath + '-bookmark.json';
   if (fs.existsSync(folderPath))
     fs.removeSync(folderPath);
   if (fs.existsSync(indexFilePath))
     fs.removeSync(indexFilePath);
+  if (fs.existsSync(bookmarkFilePath))
+    fs.removeSync(bookmarkFilePath);
 }
 
 export function readIndex(book) {
   var folderPath = Path.resolve(window.appPath, book.bookTitle);
-  var indexFilePath = folderPath + '.json';
-  if (!fs.existsSync(folderPath) || !fs.existsSync(indexFilePath)) return null;
-  return jf.readFileSync(indexFilePath);
+  var indexFilePath = folderPath + '-index.json';
+  var bookmarkFilePath = folderPath + '-bookmark.json';
+  if (!fs.existsSync(folderPath) || !fs.existsSync(indexFilePath) || !fs.existsSync(bookmarkFilePath)) return null;
+  return {
+    chapter: jf.readFileSync(indexFilePath).chapter,
+    bookmark: jf.readFileSync(bookmarkFilePath).bookmark,
+  };
 }
 
 export function readChapter(book, currentChapterOrder, index, offset) {
   var currentOrder = (currentChapterOrder === -1 ? 0 : currentChapterOrder) + offset;
   var totalChapter = book.totalChapter;
   if (currentOrder >= totalChapter || currentOrder < 0) return null;
-  var p = Path.resolve(book.bookPath.split('.json')[0], index.chapter[currentOrder]);
+  var p = Path.resolve(book.bookPath, index.chapter[currentOrder]);
   return String(fs.readFileSync(p));
+}
+
+export function objToFile(type, obj) {
+  var path = Path.resolve(window.appPath, type);
+  jf.writeFileSync(path, obj);
+}
+
+export function dataExists(folder, type) {
+  var path = Path.resolve(folder, type + '.json');
+  return fs.existsSync(path);
+}
+
+export function loadLocalData(type) {
+  var path = Path.resolve(window.appPath, type);
+  var data = jf.readFileSync(path);
+  return data;
 }

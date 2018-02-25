@@ -3,25 +3,14 @@
 
 // ============================================
 // import
-import {deleteBook} from '../utils/fileUtilities.js';
+import { deleteBook, objToFile, loadLocalData } from '../utils/fileUtilities.js';
+import { getCurrentTime } from '../utils/clockUtilities.js';
 
 // ============================================
 // functions
 function save(obj) {
-  console.log(obj);
+  objToFile('library.json', obj);
   return obj;
-}
-
-function getCurrentTime() {
-  var ct = new Date();
-  return [
-    ct.getFullYear(),
-    ct.getMonth(),
-    ct.getDate(),
-    ct.getHours(),
-    ct.getMinutes(),
-    ct.getSeconds()
-  ];
 }
 
 // ============================================
@@ -40,44 +29,49 @@ const initLibraryState = {
     //   source: 'local', 'online'
     //   scrollHeight
     //   scrollTop
-    //   fontSize -- if fontSize change, then use this data to
-    //               recover reading progress
+    //   -- if fontSize and lineHeight are changed, use these data to
+    //      recover reading progress
+    //   fontSize 
+    //   lineHeight
     //   -- If online:
     //   totalChapter: 
     //   currentChapter:
     //   currentChapterOrder:
     // }
 
-    // following is am example
-    '/Users/Ricky/Desktop/test/untitle.json': {
+    // following objects are examples
+    '/Users/Ricky/Desktop/test/untitle': {
       addTime: [2018,2,14,9,8,7],
       author: 'unknown',
-      bookPath: '/Users/Ricky/Desktop/test/untitle.json',
+      bookPath: '/Users/Ricky/Desktop/test/untitle',
       bookTitle: 'untitle',
       currentChapter: -1,
       currentChapterOrder: -1,
       fontSize: 18,
+      lineHeight: 1.5,
       lastReadTime: [],
       scrollHeight: 0,
       scrollTop: 0,
       source: 'local',
       totalChapter: 4,
     },
-    '/Users/Ricky/Desktop/test/快穿女主要上位.json': {
+    '/Users/Ricky/Desktop/test/快穿女主要上位': {
       addTime: [2017,1,1,0,0,0],
       author: "unknown",
-      bookPath: "/Users/Ricky/Desktop/test/快穿女主要上位.json",
+      bookPath: "/Users/Ricky/Desktop/test/快穿女主要上位",
       bookTitle: "快穿女主要上位",
       currentChapter: "5.第5章 假千金的逆襲04",
       currentChapterOrder: 5,
       fontSize: 18,
+      lineHeight: 1.5,
       lastReadTime: [2018,2,16,18,18,18],
       scrollHeight: 0,
       scrollTop: 0,
       source: "local",
       totalChapter: 1210
     }
-  }
+  },
+  recentReading: '',
 }
 
 // ============================================
@@ -97,6 +91,7 @@ export function library(state = initLibraryState, action) {
           currentChapter: -1,
           currentChapterOrder: -1,
           fontSize: action.fontSize,
+          lineHeight: action.lineHeight,
           lastReadTime: [],
           scrollHeight: 0,
           scrollTop: 0,
@@ -106,33 +101,50 @@ export function library(state = initLibraryState, action) {
       }
 
       return save({
-        books: books
+        ...state,
+        books: books,
       });
     case 'library deleteBooks':
       books = {...state.books};
       for (let p in action.bookPaths) {
-        var b = books[action.bookPaths[p]];
+        let b = books[action.bookPaths[p]];
         deleteBook(b);
         delete books[action.bookPaths[p]];
       }
       return save({
-        books: books
+        ...state,
+        books: books,
+        recentReading: books[state.recentReading] !== undefined ? state.recentReading : '',
       });
     case 'library updateBook':
       books = {...state.books};
-      var t = books[action.bookPath];
-      t.author = action.author;
-      t.bookPath = action.bookPath;
-      t.bookTitle = action.bookTitle;
-      t.currentChapter = action.currentChapter;
-      t.currentChapterOrder = action.currentChapterOrder;
-      t.fontSize = action.fontSize;
-      t.lastReadTime = action.lastReadTime;
-      t.scrollHeight = action.scrollHeight;
-      t.scrollTop = action.scrollTop;
-      t.totalChapter = action.totalChapter;
+      var t = books[action.book.bookPath];
+      t.author = action.book.author;
+      t.bookTitle = action.book.bookTitle;
+      t.currentChapter = action.book.currentChapter;
+      t.currentChapterOrder = action.book.currentChapterOrder;
+      t.fontSize = action.book.fontSize;
+      t.lineHeight = action.book.lineHeight;
+      t.lastReadTime = action.book.lastReadTime;
+      t.scrollHeight = action.book.scrollHeight;
+      t.scrollTop = action.book.scrollTop;
+      t.totalChapter = action.book.totalChapter;
       return save({
-          books: books
+        ...state,
+        books: books,
+      });
+    case 'library setRecentReading':
+      return save({
+        ...state,
+        recentReading: action.recentReading
+      });
+    case 'library loadData':
+      return save({
+        ...action.library,
+      });
+    case 'library initData':
+      return save({
+        ...state,
       });
     default:
       return state;
@@ -141,10 +153,7 @@ export function library(state = initLibraryState, action) {
 
 // ============================================
 // action
-export function addLocalBook(bookPath, bookTitle, fontSize, totalChapter) {
-  // get book title
-  // spacing and translating
-  // analysing chapter
+export function addLocalBook(bookPath, bookTitle, fontSize, lineHeight, totalChapter) {
   return {
     type: 'library addBook',
     author: 'unknown',
@@ -152,11 +161,12 @@ export function addLocalBook(bookPath, bookTitle, fontSize, totalChapter) {
     bookTitle: bookTitle,
     source: 'local',
     fontSize: fontSize,
+    lineHeight: lineHeight,
     totalChapter: totalChapter,
   };
 }
 
-export function addOnlineBook(url, bookTitle, author, fontSize) {
+export function addOnlineBook(url, bookTitle, author, fontSize, lineHeight) {
   // get all url of all chapter and save it to a json file
   // analysing chapter
   return {
@@ -166,6 +176,7 @@ export function addOnlineBook(url, bookTitle, author, fontSize) {
     bookTitle: bookTitle,
     source: 'online',
     fontSize: fontSize,
+    lineHeight: lineHeight,
     totalChapter: totalChapter,
   };
 }
@@ -181,5 +192,26 @@ export function deleteBooks(bookPaths) {
   return {
     type: 'library deleteBooks',
     bookPaths: bookPaths,
+  };
+}
+
+export function setRecentReading(bookPath) {
+  return {
+    type: 'library setRecentReading',
+    recentReading: bookPath,
+  };
+}
+
+export function libraryLoadData() {
+  var library = loadLocalData('library.json');
+  return {
+    type: 'library loadData',
+    library: library,
+  };
+}
+
+export function libraryInitData() {
+  return {
+    type: 'library initData',
   };
 }

@@ -77,7 +77,7 @@ class NavButton extends React.Component {
   }
 
   handleClick() {
-    if (this.props.navigator !== this.props.target)
+    if (this.props.navigator !== this.props.target) 
       this.props.dispatch(setNavigator(this.props.target));
   }
 }

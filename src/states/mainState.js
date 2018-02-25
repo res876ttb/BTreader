@@ -82,6 +82,15 @@ export function main(state = initMainState, action) {
         ...state,
         navbarCover: action.navbarCover
       };
+    case 'main curBookCheckDelete':
+      t = state.curBook;
+      if (action.bookPaths.indexOf(t.bookPath) > -1) {
+        t = null;
+      }
+      return {
+        ...state,
+        curBook: t,
+      };
     default:
       return state;
   }
@@ -174,6 +183,7 @@ export function setCurBook(curBook) {
       currentChapter: curBook.currentChapter,
       currentChapterOrder: curBook.currentChapterOrder,
       fontSize: curBook.fontSize,
+      lineHeight: curBook.lineHeight,
       lastReadTime: curBook.lastReadTime,
       scrollHeight: curBook.scrollHeight,
       scrollTop: curBook.scrollTop,
@@ -194,5 +204,12 @@ export function setNavbarCover(navbarCover) {
   return {
     type: 'main setNavbarCover', 
     navbarCover: navbarCover,
+  }
+}
+
+export function curBookCheckDelete(bookPaths) {
+  return {
+    type: 'main curBookCheckDelete',
+    bookPaths: bookPaths,
   }
 }

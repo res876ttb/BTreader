@@ -31,8 +31,12 @@ function createWindow() {
 	// developer tools
 	mainWindow.webContents.openDevTools();
 
-	mainWindow.on('closed', function() {
-		mainWindow = null;	
+	mainWindow.on('close', function (e) {
+		mainWindow.webContents.send('saveCurrentBook');
+	});
+
+	mainWindow.on('closed', function(e) {
+		mainWindow = null;
 	});
 }
 
@@ -65,6 +69,10 @@ ipcMain.on('synchronous-message', (event, arg) => {
 				properties: ['openFile', 'multiSelections']
 			});
 			event.returnValue = retVal === undefined ? [] : retVal;
+			break;
+		case 'readingDebug':
+			console.log(arg[1]);
+			event.returnValue = null;
 			break;
 		default:
 			console.error('Main process received unexpected messages:', arg);

@@ -3,11 +3,12 @@
 
 // ============================================
 // import
+import { objToFile, loadLocalData } from '../utils/fileUtilities.js';
 
 // ============================================
 // functions
 function save(obj) {
-  // save obj
+  objToFile('setting.json', obj);
   return obj;
 }
 
@@ -20,6 +21,7 @@ const initSettingState = {
   sortby: 'bookTitle', // 'bookTitle' 'addTime' 'lastReadTime'
   fontSize: 18,
   fontScale: 4,
+  lineHeight: 1.5, // fontSize * lineHeight = actual line height
 }
 
 const fontSizeArr = [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 36, 40];
@@ -59,6 +61,29 @@ export function setting (state = initSettingState, action) {
       return save({
         ...state,
         sortby: action.sortby
+      });
+    case 'setting loadData':
+      return save({
+        ...action.setting,
+      });
+    case 'setting initData':
+      return save({
+        ...state,
+      });
+    case 'setting largerLineHeight':
+      return save({
+        ...state,
+        lineHeight: state.lineHeight + 0.1 > 3 ? 3 : state.lineHeight + 0.1
+      });
+    case 'setting smallerLineHeight':
+      return save({
+        ...state,
+        lineHeight: state.lineHeight - 0.1 < 1.1 ? 1.1 : state.lineHeight - 0.1
+      });
+    case 'setting defaultLineHeight':
+      return save({
+        ...state,
+        lineHeight: 1.5
       });
     default:
       return state;
@@ -104,5 +129,40 @@ export function setFontSize(deltaScale) {
   return {
     type: 'setting setFontSize',
     deltaScale: deltaScale 
+  };
+}
+
+export function largerLineHeight() {
+  console.log('Larger line height');
+  return {
+    type: 'setting largerLineHeight'
+  };
+}
+
+export function smallerLineHeight() {
+  console.log('Smaller line height');
+  return {
+    type: 'setting smallerLineHeight'
+  };
+}
+
+export function defaultLineHeight() {
+  console.log('Reset line height');
+  return {
+    type: 'setting defaultLineHeight'
+  };
+}
+
+export function settingLoadData() {
+  var setting = loadLocalData('setting.json');
+  return {
+    type: 'setting loadData',
+    setting: setting,
+  };
+}
+
+export function settingInitData() {
+  return {
+    type: 'setting initData',
   };
 }
