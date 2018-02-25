@@ -24,6 +24,12 @@ export var lang = {
       sort1: "加入時間",
       sort2: "閱讀順序",
       sort3: "檔案名稱",
+      // noBooks: "書架上沒有書！\n您可以按上方的 開啟 按鈕來打開本地的 txt 檔案，或是到 線上書庫 點擊一本書來閱讀",
+      noBooks1: "書架上沒有書！\n您可以按上方的",
+      noBooks2: "開啟", 
+      noBooks3: "按鈕來打開本地的 txt 檔案，或是到",
+      noBooks4: "線上書庫", 
+      noBooks5: "點擊一本書來閱讀",
     },
     LibraryItem: {
       author: "作者：",

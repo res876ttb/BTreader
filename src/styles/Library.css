@@ -38,3 +38,21 @@
       max-width: 720px !important;
   }
 }
+
+.library-nobooks {
+  height: 300px;
+  margin: 10px 16px;
+  padding: 0px 32px;
+  border-radius: 10px;
+  background-color: rgb(206, 192, 131);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  white-space: pre-wrap;
+}
+
+.library-highlight {
+  font-weight: bold;
+  text-decoration: underline;
+}

@@ -19,6 +19,12 @@ import LibraryItem from './LibraryItem.jsx';
 import {
   setSortby,
 } from '../states/settingState.js';
+import { 
+  addLocalBook, deleteBooks 
+} from '../states/libraryState';
+import { 
+  setNavigator 
+} from '../states/mainState';
 
 // ============================================
 // import apis
@@ -30,7 +36,6 @@ import {
 // ============================================
 // import css file
 import '../styles/Library.css';
-import { addLocalBook, deleteBooks } from '../states/libraryState';
 
 // ============================================
 // react components
@@ -57,6 +62,7 @@ class Library extends React.Component {
     this.handleNewLocal = this.handleNewLocal.bind(this);
     this.handleAddSelect = this.handleAddSelect.bind(this);
     this.handleCancleSelect = this.handleCancleSelect.bind(this);
+    this.handleToOnline = this.handleToOnline.bind(this);
 
     this.state = {
       edit: false,
@@ -162,7 +168,17 @@ class Library extends React.Component {
         <div className='library-button-panel container'>
           {controlButton}
         </div>
-        {books}
+        {books.length === 0 ? 
+        <div className='library-nobooks'>
+          <div className='library-nobooks-in'>
+            {this.lang.noBooks1}
+            <span className='library-highlight' onClick={this.handleNewLocal}> {this.lang.noBooks2} </span>
+            {this.lang.noBooks3}
+            <span className='library-highlight' onClick={this.handleToOnline}> {this.lang.noBooks4} </span>
+            {this.lang.noBooks5}
+          </div>          
+        </div>
+         : books}
       </div>
     );
   }
@@ -208,6 +224,10 @@ class Library extends React.Component {
     var select = this.state.select.slice();
     this.props.dispatch(deleteBooks(this.state.select));
     this.setState({select: [], edit: false});
+  }
+
+  handleToOnline() {
+    this.props.dispatch(setNavigator('/online'));
   }
 
   handleNewLocal() {

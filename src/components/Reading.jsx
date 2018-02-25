@@ -173,7 +173,7 @@ class Reading extends React.Component {
           style={{fontSize: this.props.fontSize, lineHeight: this.props.lineHeight}}
         >
           <div id='reading-prevToggle' style={{height: '40px'}}></div>
-          {this.state.components}
+            {this.state.components}
           <div style={{height: '40px'}}></div>
         </div>
 

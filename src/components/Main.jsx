@@ -65,7 +65,7 @@ class Main extends React.Component {
     super(props);
 
     this.state = {
-      debug: false,
+      debug: true,
       dataLoaded1: false, // true when data is loaded
       dataLoaded2: false, // true after animation has finished
     };
@@ -80,7 +80,7 @@ class Main extends React.Component {
       // after data is loaded, display loading animation
       if (this.state.debug) {
         this.setState({dataLoaded1: true, dataLoaded2: true});
-        // this.props.dispatch(setNavigator('/library'));
+        this.props.dispatch(setNavigator('/setting'));
       } else {
         // use setTimeout on the outter layer is for making it synchronous.
         setTimeout(() => {
