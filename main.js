@@ -21,7 +21,7 @@ function createWindow() {
 		height: mainWindowState.height,
 		width: mainWindowState.width,
 		minWidth: 600,
-		minHeight: 450,
+		minHeight: 500,
 	});
 
 	mainWindowState.manage(mainWindow); // let windowStateKeeper listen to the window state and save it when it change
@@ -73,6 +73,16 @@ ipcMain.on('synchronous-message', (event, arg) => {
 		case 'readingDebug':
 			console.log(arg[1]);
 			event.returnValue = null;
+			break;
+		case 'backgroundImage':
+			console.log('Get background image path');
+			retVal = dialog.showOpenDialog({
+				filters: [
+					{name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'bmp']}
+				],
+				properties: ['openFile']
+			});
+			event.returnValue = retVal === undefined ? '' : retVal[0];
 			break;
 		default:
 			console.error('Main process received unexpected messages:', arg);

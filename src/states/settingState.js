@@ -15,75 +15,89 @@ function save(obj) {
 // ============================================
 // constants
 const initSettingState = {
-  lang: "tc", // 'tc' 'sc' 'en'
+  lang: "default", // 'tc' 'sc' 'en' 'default'
   color: "black",
   menuExpand: true,
   sortby: 'bookTitle', // 'bookTitle' 'addTime' 'lastReadTime'
   fontSize: 18,
   fontScale: 4,
   lineHeight: 1.5, // fontSize * lineHeight = actual line height
+  autoLoad: false,
+  backgroundColor: 'rgb(212,212,212)',
+  backgroundPath: '',
 }
 
-const fontSizeArr = [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 36, 40];
+const fontSizeArr = [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40];
 
 // ============================================
 // reducer
 export function setting (state = initSettingState, action) {
   switch(action.type) {
     case 'setting setLang':
+      console.log('Set program language to', action.lang);
       return save({
         ...state,
         lang: action.lang
       });
     case 'setting setFontColor':
+      console.log('Set font color to', action.color);
       return save({
         ...state,
         color: action.color
       });
     case 'setting setMenuExpand':
+      console.log('Set menu', action.menuExpand ? 'expand' : 'collapse');
       return save ({
         ...state,
         menuExpand: action.menuExpand
       });
     case 'setting setFontSize':
-      let scale = state.fontScale + action.deltaScale;
-      if (scale > 13) {
-        scale = 13;
-      } else if (scale < 0) {
-        scale = 0;
-      }
+      console.log('Set font size to', action.fontSize);
       return save({
         ...state,
-        fontSize: fontSizeArr[scale],
-        fontScale: scale,
+        fontSize: action.fontSize,
+      });
+    case 'setting setLineHeight':
+      console.log('Set line height to', action.lineHeight);
+      return save({
+        ...state,
+        lineHeight: action.lineHeight,
       });
     case 'setting setSortby':
+      console.log('Set sorting order to', action.sortby);
       return save({
         ...state,
         sortby: action.sortby
       });
     case 'setting loadData':
+      console.log('Load setting...');
       return save({
         ...action.setting,
       });
     case 'setting initData':
+      console.log('No local setting! Load default setting...');
       return save({
         ...state,
       });
-    case 'setting largerLineHeight':
+    case 'setting setAutoLoad':
+      console.log('Set autoLoad to', action.autoLoad);
       return save({
         ...state,
-        lineHeight: state.lineHeight + 0.1 > 3 ? 3 : state.lineHeight + 0.1
+        autoLoad: action.autoLoad,
       });
-    case 'setting smallerLineHeight':
+    case 'setting setBackgroundColor':
+      console.log('Set background color to', action.backgroundColor);
       return save({
         ...state,
-        lineHeight: state.lineHeight - 0.1 < 1.1 ? 1.1 : state.lineHeight - 0.1
+        backgroundColor: action.backgroundColor,
+        backgroundPath: '',
       });
-    case 'setting defaultLineHeight':
+    case 'setting setBackgroundImage':
+      console.log('Set background image');
       return save({
         ...state,
-        lineHeight: 1.5
+        backgroundColor: '',
+        backgroundPath: action.backgroundPath,
       });
     default:
       return state;
@@ -93,7 +107,6 @@ export function setting (state = initSettingState, action) {
 // ============================================
 // action
 export function setLang(lang) {
-  console.log('Set language to', lang);
   return {
     type: 'setting setLang',
     lang: lang,
@@ -101,7 +114,6 @@ export function setLang(lang) {
 }
 
 export function setFontColor(color) {
-  console.log('Set font color to', color);
   return {
     type: 'setting setFontColor',
     color: color
@@ -109,7 +121,6 @@ export function setFontColor(color) {
 }
 
 export function setMenuExpand(v) {
-  console.log('Menu expand:', v);
   return {
     type: 'setting setMenuExpand',
     menuExpand: v
@@ -117,39 +128,23 @@ export function setMenuExpand(v) {
 }
 
 export function setSortby(v) {
-  console.log('Library sort by', v);
   return {
     type: 'setting setSortby',
     sortby: v
   };
 }
 
-export function setFontSize(deltaScale) {
-  console.log('Delta font scale', deltaScale);
+export function setFontSize(fontSize) {
   return {
     type: 'setting setFontSize',
-    deltaScale: deltaScale 
+    fontSize: fontSize 
   };
 }
 
-export function largerLineHeight() {
-  console.log('Larger line height');
+export function setLineHeight(lineHeight) {
   return {
-    type: 'setting largerLineHeight'
-  };
-}
-
-export function smallerLineHeight() {
-  console.log('Smaller line height');
-  return {
-    type: 'setting smallerLineHeight'
-  };
-}
-
-export function defaultLineHeight() {
-  console.log('Reset line height');
-  return {
-    type: 'setting defaultLineHeight'
+    type: 'setting setLineHeight',
+    lineHeight: lineHeight,
   };
 }
 
@@ -164,5 +159,26 @@ export function settingLoadData() {
 export function settingInitData() {
   return {
     type: 'setting initData',
+  };
+}
+
+export function setAutoLoad(autoLoad) {
+  return {
+    type: 'setting setAutoLoad',
+    autoLoad: autoLoad,
+  };
+}
+
+export function setBackgroundColor(backgroundColor) {
+  return {
+    type: 'setting setBackgroundColor',
+    backgroundColor: backgroundColor,
+  };
+}
+
+export function setBackgroundImage(path) {
+  return {
+    type: 'setting setBackgroundImage',
+    backgroundPath: path,
   };
 }

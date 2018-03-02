@@ -24,6 +24,9 @@ import {
 import '../styles/NavButton.css';
 
 // ============================================
+// constants
+
+// ============================================
 // react components
 class NavButton extends React.Component {
   static propTypes = {

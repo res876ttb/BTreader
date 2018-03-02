@@ -1,5 +1,5 @@
 .library-main {
-  margin: 1rem 0rem 0rem 0rem;
+  /* margin: 1rem 0rem 0rem 0rem; */
   padding-bottom: 10px;
   box-sizing: border-box; 
   text-align: center;
@@ -14,7 +14,7 @@
 }
 
 .library-control-panel {
-  width: 100%;
+  margin-top: 16px !important;
 }
 
 .library-edit-button {

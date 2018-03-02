@@ -25,6 +25,9 @@ import {
 import '../styles/Navigator.css';
 
 // ============================================
+// constants
+
+// ============================================
 // react components
 class Navigator extends React.Component {
   static propTypes = {

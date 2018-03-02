@@ -20,6 +20,9 @@ import {connect} from 'react-redux';
 import '../styles/ChapterList.css';
 
 // ============================================
+// constants
+
+// ============================================
 // react components
 class ChapterList extends React.Component {
   static propTypes = {

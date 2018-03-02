@@ -46,6 +46,9 @@ import {
 import '../styles/Main.css';
 
 // ============================================
+// constants
+
+// ============================================
 // react components
 class Main extends React.Component {
   static propTypes = {
@@ -59,6 +62,9 @@ class Main extends React.Component {
     navbarExpand:     PropTypes.bool,
     recentReading:    PropTypes.string,
     books:            PropTypes.object,
+    autoLoad:         PropTypes.bool,
+    backgroundColor:  PropTypes.string,
+    backgroundPath:   PropTypes.string,
   }
 
   constructor(props) {
@@ -77,12 +83,23 @@ class Main extends React.Component {
 
     // load data from application path
     this.loadData().then(() => {
+      // set application language
+      this.props.dispatch(setLangPack(this.props.lang));
+      if (this.props.backgroundPath === '') {
+        document.getElementById('root').style.backgroundColor = this.props.backgroundColor;
+      } else {
+        document.getElementById('root').style.backgroundImage = `url(\'${this.props.backgroundPath}\')`;
+      }
+
       // after data is loaded, display loading animation
       if (this.state.debug) {
         this.setState({dataLoaded1: true, dataLoaded2: true});
         this.props.dispatch(setNavigator('/setting'));
       } else {
         // use setTimeout on the outter layer is for making it synchronous.
+        if (this.props.autoLoad === true) {
+          this.props.dispatch(setNavigator('/reading'));
+        }
         setTimeout(() => {
           this.setState({dataLoaded1: true});
           setTimeout(() => {
@@ -91,9 +108,10 @@ class Main extends React.Component {
         }, 1);
       }
     });
+  }
 
-    // set application language
-    this.props.dispatch(setLangPack(this.props.lang));
+  componentDidMount() {
+    document.getElementById('root').style.backgroundColor = this.props.backgroundColor;
   }
 
   render() {
@@ -233,4 +251,7 @@ export default connect (state => ({
   navbarExpand:     state.setting.menuExpand,
   recentReading:    state.library.recentReading,
   books:            state.library.books,
+  autoLoad:         state.setting.autoLoad,
+  backgroundColor:  state.setting.backgroundColor,
+  backgroundPath:   state.setting.backgroundPath,
 }))(Main);

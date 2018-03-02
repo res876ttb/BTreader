@@ -38,6 +38,9 @@ import {
 import '../styles/Library.css';
 
 // ============================================
+// constants
+
+// ============================================
 // react components
 class Library extends React.Component {
   static propTypes = {
@@ -165,7 +168,7 @@ class Library extends React.Component {
 
     return (
       <div className='library-main container'>
-        <div className='library-button-panel container'>
+        <div className='library-control-panel container'>
           {controlButton}
         </div>
         {books.length === 0 ? 

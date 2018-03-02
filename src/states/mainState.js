@@ -148,10 +148,10 @@ export function setLangPack(langSetting) {
   };
   
   if (langSetting === 'default') {
-    if (window.navigator.language === 'zh_TW' || window.navigator.language === 'zh_HK') {
+    if (window.navigator.language === 'zh-TW' || window.navigator.language === 'zh-HK') {
       retVal.langPack = lang.tc;
       console.log('Set program language to Traditional Chinese.');
-    } else if (window.navigator.language === 'zh_CN') {
+    } else if (window.navigator.language === 'zh-CN') {
       retVal.langPack = lang.sc;
       console.log('Set program language to Simplified Chinese.');
     } else {

@@ -40,18 +40,22 @@ import {
 import '../styles/Reading.css';
 
 // ============================================
+// constants
+
+// ============================================
 // react components
 class Reading extends React.Component {
   static propTypes = {
-    dispatch: PropTypes.func,
-    book: PropTypes.object,
-    books: PropTypes.object,
-    navigator: PropTypes.string,
-    preNavigator: PropTypes.string,
-    menuExpand: PropTypes.bool,
-    langPack: PropTypes.object,
-    lineHeight: PropTypes.number,
-    fontSize: PropTypes.number,
+    dispatch:      PropTypes.func,
+    book:          PropTypes.object,
+    books:         PropTypes.object,
+    color:         PropTypes.string,
+    navigator:     PropTypes.string,
+    preNavigator:  PropTypes.string,
+    menuExpand:    PropTypes.bool,
+    langPack:      PropTypes.object,
+    lineHeight:    PropTypes.number,
+    fontSize:      PropTypes.number,
     recentReading: PropTypes.string,
   }
 
@@ -170,7 +174,7 @@ class Reading extends React.Component {
           id='reading-scrollbox' 
           className='reading-main container max720' 
           onScroll={this.checkIfLoading}
-          style={{fontSize: this.props.fontSize, lineHeight: this.props.lineHeight}}
+          style={{fontSize: this.props.fontSize, lineHeight: this.props.lineHeight, color: this.props.color}}
         >
           <div id='reading-prevToggle' style={{height: '40px'}}></div>
             {this.state.components}
@@ -238,7 +242,6 @@ class Reading extends React.Component {
       var offset = firstComponent.scrollHeight + 
                    (this.props.book.currentChapterOrder <= 0 ? 0 : 40) + 
                    currentComponent.scrollHeight * this.props.book.scrollTop / this.props.book.scrollHeight;
-      console.log(currentComponent.scrollHeight, this.props.book.scrollTop, this.props.book.scrollHeight, this.props.book.scrollTop / this.props.book.scrollHeight);
       scrollbox.scrollTop = offset;
       this.setState({scrollInit: true});
     }
@@ -584,6 +587,7 @@ class Reading extends React.Component {
 export default connect (state => ({
   book:          state.main.curBook,
   books:         state.library.books,
+  color:         state.setting.color,
   navigator:     state.main.navigator,
   preNavigator:  state.main.preNavigator,
   menuExpand:    state.setting.menuExpand,

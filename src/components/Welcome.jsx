@@ -25,6 +25,9 @@ import {
 import '../styles/Welcome.css';
 
 // ============================================
+// constants
+
+// ============================================
 // react components
 class Welcome extends React.Component {
   static propTypes = {

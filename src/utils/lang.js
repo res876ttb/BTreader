@@ -46,6 +46,36 @@ export var lang = {
     },
     Reading: {
       norecent: "沒有最近的閱讀紀錄！趕快到書架選一本書來閱讀吧！您也可以透過線上書庫來閱讀您喜歡的書。"
-    }
+    },
+    Setting: {
+      yes: "是",
+      no: "否",
+      autoLoad: "自動載入上次關閉前的閱讀紀錄",
+      fontSize: "字體大小",
+      fontSizeTitle: "選擇字體大小",
+      default: "預設",
+      small: "小",
+      verySmall: "很小",
+      large: "大",
+      veryLarge: "很大",
+      superLarge: "非常大",
+      lineHeight: "行高",
+      language: "語言",
+      systemDefault: "系統預設",
+      english: "英語 english",
+      tchinese: "繁體中文",
+      schinese: "簡體中文 简体中文",
+      fontColor: "文字䫩色",
+      backgroundColor: "背景顏色",
+      bctitle: "自定背景顏色",
+      cancel: "取消",
+      confirm: "確認",
+      bcbcustom: "調色盤",
+      localImage: "圖片",
+      fctitle: "自定文字顏色",
+      fcbcustom: "調色盤",
+      previewContent: "文字大小預覽\n以及行距預覽",
+      preview: "預覽",
+    },
   }
 }

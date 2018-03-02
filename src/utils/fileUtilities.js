@@ -202,3 +202,11 @@ export function loadLocalData(type) {
   var data = jf.readFileSync(path);
   return data;
 }
+
+export function getImagePath() {
+  return ipcRenderer.sendSync('synchronous-message', ['backgroundImage']);
+}
+
+export function makeBackgroundImage(path) {
+  fs.copySync(path, Path.resolve(window.appPath, 'background.' + path.split('.').pop()));
+}

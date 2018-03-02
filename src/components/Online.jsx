@@ -19,6 +19,9 @@ import {connect} from 'react-redux';
 // import css file
 
 // ============================================
+// constants
+
+// ============================================
 // react components
 class Online extends React.Component {
   static propTypes = {

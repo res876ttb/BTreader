@@ -19,6 +19,9 @@ import {connect} from 'react-redux';
 // import css file
 
 // ============================================
+// constants
+
+// ============================================
 // react components
 class ReadingContent extends React.Component {
   static propTypes = {

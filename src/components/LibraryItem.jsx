@@ -25,6 +25,9 @@ import {
 import '../styles/LibraryItem.css';
 
 // ============================================
+// constants
+
+// ============================================
 // react components
 class LibraryItem extends React.Component {
   static propTypes = {
@@ -96,8 +99,8 @@ class LibraryItem extends React.Component {
            String(timeArr[1]) + '/' +
            String(timeArr[2]) + ' ' +
            String(timeArr[3]) + ':' +
-           String(timeArr[4]) + ':' +
-           String(timeArr[5]);
+           ((timeArr[4] > 10) ? String(timeArr[4]) : ('0' + String(timeArr[4]))) + ':' +
+           ((timeArr[5] > 10) ? String(timeArr[5]) : ('0' + String(timeArr[5])));
   }
 }
 

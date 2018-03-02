@@ -9,6 +9,8 @@ import ReactDOM from 'react-dom';
 import thunkMiddleware from 'redux-thunk';
 import {Provider} from 'react-redux';
 import {createStore, combineReducers, compose, applyMiddleware} from 'redux';
+import {MuiThemeProvider, createMuiTheme} from 'material-ui/styles';
+import blue from 'material-ui/colors/blue';
 
 // ============================================
 // import react components
@@ -37,9 +39,18 @@ window.onload = function() {
     library,
   }), composeEnhancers(applyMiddleware(thunkMiddleware)));
 
+  // customize global material theme
+  const theme = createMuiTheme({
+    palette: {
+      primary: blue
+    }
+  });
+
   ReactDOM.render(
     <Provider store={store}>
-      <Main />
+      <MuiThemeProvider theme={theme}>
+        <Main />
+      </MuiThemeProvider>
     </Provider>,
     document.getElementById('root')
   );
