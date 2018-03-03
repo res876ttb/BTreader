@@ -118,6 +118,7 @@ class Setting extends React.Component {
     lang:            PropTypes.string,
     backgroundColor: PropTypes.string,
     backgroundPath:  PropTypes.string,
+    navigator:       PropTypes.string,
   }
 
   constructor(props) {
@@ -162,18 +163,24 @@ class Setting extends React.Component {
     this.handleFontColorChange = this.handleFontColorChange.bind(this);
     this.handleCancleFCCustom  = this.handleCancleFCCustom.bind(this);
     this.handleConfirmFCCustom = this.handleConfirmFCCustom.bind(this);
+
   // state
     this.state = {
       customBCOpen: false,
       customFCOpen: false,
       backgroundColor: '#00000',
-      fontColor: '#000000'
+      fontColor: '#000000',
     };
   }
 
   componentWillMount() {
     this.setState({backgroundColor: this.props.backgroundColor});
     this.setState({fontColor: this.props.fontColor});
+  }
+
+  componentDidMount() {
+    // this part is for prevent wrong rendering of background image of preview window
+    this.previewRerender(document.getElementById('setting-preview'));
   }
 
   componentDidUpdate() {
@@ -184,12 +191,16 @@ class Setting extends React.Component {
     if (this.props.backgroundPath !== '' && this.props.backgroundPath !== document.getElementById('root').style.backgroundPath) {
       document.getElementById('root').style.backgroundImage = `url(\'${this.props.backgroundPath}\')`;
     }
+    if (this.props.navigator === '/setting') {
+      this.previewRerender(document.getElementById('setting-preview'));
+    }
   }
 
   render() {
   // Div space, h1, h30, and w20
     var h1  = (<div style={{height:  '1px', width: '100%'}}></div>);
     var h30 = (<div style={{height: '30px', width: '100%'}}></div>);
+    var h80 = (<div style={{height: '80px', width: '100%'}}></div>);
     var w20 = (<div style={{height:  '1px', width: '20px', display: 'inline-block'}}></div>);
 
   // Component of background setting
@@ -431,17 +442,13 @@ class Setting extends React.Component {
         <div className='setting-inline-text' style={{width: '120px', paddingLeft: '14px', flex: 'none'}}>
           {this.lang.preview}
         </div>
-        <div className='setting-inline-block' style={{
+        <div id='setting-preview' className='setting-inline-block setting-preview' style={{
           fontSize: this.props.fontSize,
           color: this.props.fontColor,
           lineHeight: this.props.lineHeight,
           borderRadius: '2px',
-          background: `url(\'${this.props.backgroundPath}\')`,
+          backgroundImage: `url(\'${this.props.backgroundPath}\')`,
           backgroundColor: this.props.backgroundColor,
-          backgroundAttachment: 'fixed',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundSize: 'cover',
           whiteSpace: 'pre-wrap',
           padding: '10px 20px',
           margin: '10px 20px 10px 0px',
@@ -452,7 +459,7 @@ class Setting extends React.Component {
       </div>
     );
 
-    // return render content
+  // return render content
     return (
       <div className='setting-out container'>
         <div className='setting-main'>
@@ -469,7 +476,7 @@ class Setting extends React.Component {
           {fontColor}
           {h30}
           {preview}
-          {h30}
+          {h80}
         </div>
       </div>
     );
@@ -657,6 +664,20 @@ class Setting extends React.Component {
       this.props.dispatch(setBackgroundImage(path));
     }, 200);
   }
+
+// previewRerender
+  previewRerender(preview) {
+    let psbgi = preview.style.backgroundImage;
+    if (this.props.navigator !== '/setting' || psbgi === 'url(\"\")' || psbgi === 'none') return;
+    preview.style.paddingRight = '19px';
+    setTimeout(() => {
+      preview.style.paddingRight = '20px';
+      setTimeout(() => {
+        this.previewRerender(preview);
+        console.log('Here');
+      }, 100);
+    }, 100);
+  }
 }
 
 export default connect (state => ({
@@ -668,6 +689,7 @@ export default connect (state => ({
   backgroundColor: state.setting.backgroundColor,
   backgroundPath:  state.setting.backgroundPath,
   fontColor:       state.setting.color,
+  navigator:       state.main.navigator,
 }))(
   withStyles(styles)(Setting)
 );
