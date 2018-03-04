@@ -53,7 +53,7 @@ class Navigator extends React.Component {
     return (
       <div id='navigator' style={{height: "40px"}}>
         {/* menu button bar */}
-        <div className={this.props.menuExpand === true ? 'nav-menubar' : 'nav-menubar-hide'}>
+        <div className={this.props.menuExpand === true ? 'nav-menubar has-shadow' : 'nav-menubar-hide has-shadow'}>
           <NavButton target='/' content={this.props.langPack.Navbar.button1}/>
           <NavButton target='/reading' content={this.props.langPack.Navbar.button4}/>
           <NavButton target='/library' content={this.props.langPack.Navbar.button2}/>
@@ -81,6 +81,7 @@ class Navigator extends React.Component {
 
         {/* menu button */}
         <div 
+          className='has-shadow'
           id={this.props.menuExpand === true ? 'nav-menu-out' : 'nav-menu-out-float'} 
           onClick={this.handleMenuClick}
         >
