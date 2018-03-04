@@ -25,6 +25,7 @@ const initSettingState = {
   autoLoad: false,
   backgroundColor: 'rgb(212,212,212)',
   backgroundPath: '',
+  readingPreferLanguage: 'auto', // auto, sc2tc, tc2sc, none
 }
 
 const fontSizeArr = [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40];
@@ -98,6 +99,12 @@ export function setting (state = initSettingState, action) {
         ...state,
         backgroundColor: '',
         backgroundPath: action.backgroundPath,
+      });
+    case 'setting setReadingPreferLanguage':
+      console.log('Set prefer language of reading to', action.readingPreferLanguage);
+      return save({
+        ...state,
+        readingPreferLanguage: action.readingPreferLanguage,
       });
     default:
       return state;
@@ -180,5 +187,12 @@ export function setBackgroundImage(path) {
   return {
     type: 'setting setBackgroundImage',
     backgroundPath: path,
+  };
+}
+
+export function setReadingPreferLanguage(v) {
+  return {
+    type: 'setting setReadingPreferLanguage',
+    readingPreferLanguage: v,
   };
 }

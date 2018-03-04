@@ -19,6 +19,7 @@ import {
   setCurBook,
   setNavTitle,
   setNavbarCover,
+  setReadingReload,
 } from '../states/mainState.js';
 import {
   updateBook,
@@ -57,6 +58,7 @@ class Reading extends React.Component {
     lineHeight:    PropTypes.number,
     fontSize:      PropTypes.number,
     recentReading: PropTypes.string,
+    reload:        PropTypes.bool,
   }
 
   constructor(props) {
@@ -143,8 +145,9 @@ class Reading extends React.Component {
         this.setState({notSave: true});
       }
 
-      // if bookTitle is change, then verify it as book is changed
-      if (this.state.bookTitle !== this.props.book.bookTitle) {
+      // if bookTitle is change, then regard it as book is changed; or when translating setting
+      // is changed, then relaod reading content
+      if (this.state.bookTitle !== this.props.book.bookTitle || this.props.reload) {
         console.log('Reading book is changed!');
         this.initReading();
       } if (this.props.recentReading === '' && this.state.noRecent === false) {
@@ -272,6 +275,7 @@ class Reading extends React.Component {
     var idArr = ['reading-content-head', 'reading-content-5000', 'reading-content-tail'];
     var currentChapter  = cco == 0 ? 0 : this.props.book.currentChapter;
 
+    this.props.dispatch(setReadingReload(false));
     this.props.dispatch(setRecentReading(this.props.book.bookPath));
     this.props.dispatch(setNavTitle(currentChapter));
 
@@ -595,6 +599,7 @@ export default connect (state => ({
   lineHeight:    state.setting.lineHeight,
   fontSize:      state.setting.fontSize,
   recentReading: state.library.recentReading,
+  reload:        state.main.readingReload,
 }))(Reading);
 
 /* bookmark format:

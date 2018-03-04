@@ -44,14 +44,15 @@ import '../styles/Library.css';
 // react components
 class Library extends React.Component {
   static propTypes = {
-    dispatch: PropTypes.func,
-    sortby: PropTypes.string,
-    langPack: PropTypes.object,
-    books: PropTypes.object,
-    lang: PropTypes.string,
-    fontSize: PropTypes.number,
-    navigator: PropTypes.string,
-    lineHeight: PropTypes.number,
+    dispatch:     PropTypes.func,
+    sortby:       PropTypes.string,
+    langPack:     PropTypes.object,
+    books:        PropTypes.object,
+    lang:         PropTypes.string,
+    fontSize:     PropTypes.number,
+    navigator:    PropTypes.string,
+    lineHeight:   PropTypes.number,
+    readPrefLang: PropTypes.string,
   }
 
   constructor(props) {
@@ -240,7 +241,7 @@ class Library extends React.Component {
       let path = paths[i];
       let bookTitle = path.split('/').pop().split('\\').pop().split('.')[0];
       if (this.isBookExists(bookTitle) === false) {
-        processLocal(path, bookTitle, this.props.lang).then(v => {
+        processLocal(path, bookTitle, this.props.lang, this.props.readPrefLang).then(v => {
           let bookPath = v.bookPath;
           let totalChapter = v.totalChapter;
           this.props.dispatch(addLocalBook(bookPath, bookTitle, this.props.fontSize, this.props.lineHeight, totalChapter));
@@ -285,11 +286,12 @@ class Library extends React.Component {
 }
 
 export default connect (state => ({
-  sortby:     state.setting.sortby,
-  langPack:   state.main.langPack,
-  books:      state.library.books,
-  lang:       state.setting.lang,
-  fontSize:   state.setting.fontSize,
-  lineHeight: state.setting.lineHeight,
-  navigator:  state.main.navigator,
+  sortby:       state.setting.sortby,
+  langPack:     state.main.langPack,
+  books:        state.library.books,
+  lang:         state.setting.lang,
+  fontSize:     state.setting.fontSize,
+  lineHeight:   state.setting.lineHeight,
+  navigator:    state.main.navigator,
+  readPrefLang: state.setting.readingPreferLanguage,
 }))(Library);

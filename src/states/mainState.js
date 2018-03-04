@@ -33,6 +33,7 @@ const initMainState = {
   curBook: null,
   navTitle: null,
   navbarCover: 0,
+  readingReload: false,
 }
 
 // ============================================
@@ -91,6 +92,11 @@ export function main(state = initMainState, action) {
         ...state,
         curBook: t,
       };
+    case 'main setReadingReload':
+      return {
+        ...state,
+        readingReload: action.readingReload,
+      }
     default:
       return state;
   }
@@ -204,12 +210,19 @@ export function setNavbarCover(navbarCover) {
   return {
     type: 'main setNavbarCover', 
     navbarCover: navbarCover,
-  }
+  };
 }
 
 export function curBookCheckDelete(bookPaths) {
   return {
     type: 'main curBookCheckDelete',
     bookPaths: bookPaths,
-  }
+  };
+}
+
+export function setReadingReload(v) {
+  return {
+    type: 'main setReadingReload',
+    readingReload: v,
+  };
 }

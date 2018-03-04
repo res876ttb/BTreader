@@ -53,7 +53,7 @@ export function newLocal() {
   return paths;
 }
 
-export function processLocal(path, bookTitle, lang) {
+export function processLocal(path, bookTitle, lang, readPrefLang) {
   console.log('Open local file:', path);
   var dataPath = window.appDataPath;
   return new Promise((resolve, reject) => {
@@ -87,10 +87,26 @@ export function processLocal(path, bookTitle, lang) {
 
   }).then(content => {
     // translating file content
-    if (lang === 'tc') {
+    if (readPrefLang === 'auto') {
+      if (lang === 'tc') {
+        return Traditionalized(content).split(/\r?\n/);
+      } else if (lang === 'sc') {
+        return Simplized(content).split(/\r?\n/);
+      } else {
+        if (window.navigator.language === 'zh-TW' || window.navigator.language === 'zh-HK') {
+          return Traditionalized(content).split(/\r?\n/);
+        } else if (window.navigator.language === 'zh-CN') {
+          return Simplized(content).split(/\r?\n/);
+        } else {
+          return content.split(/\r?\n/);
+        }
+      }
+    } else if (readPrefLang === 'sc2tc') {
       return Traditionalized(content).split(/\r?\n/);
-    } else if (lang === 'sc') {
+    } else if (readPrefLang === 'tc2sc') {
       return Simplized(content).split(/\r?\n/);
+    } else {
+      return content.split(/\r?\n/);
     }
 
   }).then(content => {
@@ -209,4 +225,54 @@ export function getImagePath() {
 
 export function makeBackgroundImage(path) {
   fs.copySync(path, Path.resolve(window.appPath, 'background.' + path.split('.').pop()));
+}
+
+export function retranslate(books, readPrefLang, lang, dispatch, update) {
+  if (readPrefLang === 'auto') {
+    if (lang === 'tc') {
+      translateAll(books, 'tc', dispatch, update);
+    } else if (lang === 'sc') {
+      translateAll(books, 'sc', dispatch, update)
+    } else {
+      if (window.navigator.language === 'zh-TW' || window.navigator.language === 'zh-HK') {
+        translateAll(books, 'tc', dispatch, update);
+      } else if (window.navigator.language === 'zh-CN') {
+        translateAll(books, 'sc', dispatch, update);
+      } else {
+        return;
+      }
+    }
+  } else if (readPrefLang === 'sc2tc') {
+    translateAll(books, 'tc', dispatch, update);
+  } else if (readPrefLang === 'tc2sc') {
+    translateAll(books, 'sc', dispatch, update);
+  } else {
+    return;
+  }
+}
+
+function translateAll(books, option, dispatch, update) {
+  var translate = option === 'tc' ? Traditionalized : Simplized;
+  var newBooks = {...books};
+  for (let path in books) {
+    let folderPath = books[path].bookPath;
+    let chaptersPath = folderPath + '-index.json';
+    let bookmarkPath = folderPath + '-bookmark.json';
+    let chapters = jf.readFileSync(chaptersPath).chapter;
+    for (let chapterIndex in chapters) {
+      let chapterPath = Path.resolve(folderPath, chapters[chapterIndex]);
+      let newChapterPath = Path.resolve(folderPath, translate(chapters[chapterIndex]));
+      let content = String(fs.readFileSync(chapterPath));
+      fs.removeSync(chapterPath);
+      fs.writeFileSync(newChapterPath, translate(content));
+    }
+    let chapterContent = String(fs.readFileSync(chaptersPath));
+    let bookmarkContent = String(fs.readFileSync(bookmarkPath));
+    fs.writeFileSync(chaptersPath, translate(chapterContent));
+    fs.writeFileSync(bookmarkPath, translate(bookmarkContent));
+    newBooks[path].author = translate(books[path].author);
+    newBooks[path].bookTitle = translate(books[path].bookTitle);
+    newBooks[path].currentChapter = translate(books[path].currentChapter);
+  }
+  dispatch(update(newBooks));
 }

@@ -9,7 +9,7 @@ import Switch from 'material-ui/Switch';
 import Select from 'material-ui/Select';
 import Button from 'material-ui/Button';
 import Input, { InputLabel } from 'material-ui/Input';
-import Dialog, { DialogTitle, DialogActions } from 'material-ui/Dialog';
+import Dialog, { DialogTitle, DialogActions, DialogContent, DialogContentText } from 'material-ui/Dialog';
 import { MenuItem } from 'material-ui/Menu';
 import { FormControl, FormHelperText } from 'material-ui/Form';
 import { SketchPicker } from 'react-color';
@@ -28,14 +28,25 @@ import {
   setLineHeight,
   setBackgroundColor,
   setBackgroundImage,
+  setReadingPreferLanguage,
 } from '../states/settingState.js';
+import { 
+  updateAllBooks,
+} from '../states/libraryState.js';
+import {
+  setReadingReload, setCurBook,
+} from '../states/mainState.js';
 
 // ============================================
 // import apis
 import {
   getImagePath,
   makeBackgroundImage,
+  retranslate,
 } from '../utils/fileUtilities.js';
+import {
+  translateCurBook
+} from '../utils/wordProcess.js';
 
 // ============================================
 // import css file
@@ -119,6 +130,9 @@ class Setting extends React.Component {
     backgroundColor: PropTypes.string,
     backgroundPath:  PropTypes.string,
     navigator:       PropTypes.string,
+    readPrefLang:    PropTypes.string,
+    books:           PropTypes.object,
+    curBook:         PropTypes.object,
   }
 
   constructor(props) {
@@ -143,9 +157,9 @@ class Setting extends React.Component {
     this.handleSetBCBrown     = this.handleSetBCBrown.bind(this);
     this.handleSetBCDdgray    = this.handleSetBCDdgray.bind(this);
     
-    this.handleClickBCCustom  = this.handleClickBCCustom.bind(this);
+    this.handleClickBCCustom      = this.handleClickBCCustom.bind(this);
     this.handleColorChange        = this.handleColorChange.bind(this);
-    this.handleCancleBCCustom     = this.handleCancleBCCustom.bind(this);
+    this.handleCancelBCCustom     = this.handleCancelBCCustom.bind(this);
     this.handleConfirmBCCustom    = this.handleConfirmBCCustom.bind(this);
     this.handleGetBackgroundImage = this.handleGetBackgroundImage.bind(this);
 
@@ -161,8 +175,12 @@ class Setting extends React.Component {
 
     this.handleClickFCCustom   = this.handleClickFCCustom.bind(this);
     this.handleFontColorChange = this.handleFontColorChange.bind(this);
-    this.handleCancleFCCustom  = this.handleCancleFCCustom.bind(this);
+    this.handleCancelFCCustom  = this.handleCancelFCCustom.bind(this);
     this.handleConfirmFCCustom = this.handleConfirmFCCustom.bind(this);
+
+    this.handleSetReadPrefLang = this.handleSetReadPrefLang.bind(this);
+    this.handleCancelCRT       = this.handleCancelCRT.bind(this);
+    this.handleConfirmCRT      = this.handleConfirmCRT.bind(this);
 
   // state
     this.state = {
@@ -170,6 +188,7 @@ class Setting extends React.Component {
       customFCOpen: false,
       backgroundColor: '#00000',
       fontColor: '#000000',
+      askTransAll: false,
     };
   }
 
@@ -226,13 +245,13 @@ class Setting extends React.Component {
       </Tooltip>
     );
     var bcbcustomdialog = (
-      <Dialog onClose={this.handleCancleBCCustom} open={this.state.customBCOpen}>
+      <Dialog onClose={this.handleCancelBCCustom} open={this.state.customBCOpen}>
         <DialogTitle>{this.lang.bctitle}</DialogTitle>
         <div style={{display: 'flex', justifyContent: 'center', marginLeft: '10px', marginRight: '10px'}}>
           <SketchPicker disableAlpha={true} onChangeComplete={this.handleColorChange} color={this.state.backgroundColor}/>
         </div>
         <DialogActions>
-          <Button onClick={this.handleCancleBCCustom}>
+          <Button onClick={this.handleCancelBCCustom}>
             {this.lang.cancel}
           </Button>
           <Button onClick={this.handleConfirmBCCustom}>
@@ -271,13 +290,13 @@ class Setting extends React.Component {
       </Tooltip>
     );
     var fcbcustomdialog = (
-      <Dialog onClose={this.handleCancleFCCustom} open={this.state.customFCOpen}>
+      <Dialog onClose={this.handleCancelFCCustom} open={this.state.customFCOpen}>
         <DialogTitle>{this.lang.fctitle}</DialogTitle>
         <div style={{display: 'flex', justifyContent: 'center', marginLeft: '10px', marginRight: '10px'}}>
           <SketchPicker disableAlpha={true} onChangeComplete={this.handleFontColorChange} color={this.state.fontColor}/>
         </div>
         <DialogActions>
-          <Button onClick={this.handleCancleFCCustom}>
+          <Button onClick={this.handleCancelFCCustom}>
             {this.lang.cancel}
           </Button>
           <Button onClick={this.handleConfirmFCCustom}>
@@ -312,8 +331,7 @@ class Setting extends React.Component {
         </div>
         <div className='setting-inline-block'>
           <form>
-            <FormControl style={{maxHeight: '300px'}}>
-              {/* <InputLabel htmlFor="font size">Font Size</InputLabel> */}
+            <FormControl>
               <Select
                 value={this.props.fontSize}
                 onChange={this.handleSetFontSize}
@@ -347,8 +365,7 @@ class Setting extends React.Component {
         </div>
         <div className='setting-inline-block'>
           <form>
-            <FormControl style={{maxHeight: '300px'}}>
-              {/* <InputLabel htmlFor="font size">Font Size</InputLabel> */}
+            <FormControl>
               <Select
                 value={this.props.lineHeight}
                 onChange={this.handleSetLineHeight}
@@ -368,15 +385,13 @@ class Setting extends React.Component {
 
   // Setting of program language
     var programLanguage = (
-      // adjust line height
       <div className='setting-block has-shadow'>
         <div className='setting-inline-text' style={{width: '120px', paddingLeft: '14px', flex: 'none'}}>
           {this.lang.language}
         </div>
         <div className='setting-inline-block'>
           <form>
-            <FormControl style={{maxHeight: '300px'}}>
-              {/* <InputLabel htmlFor="font size">Font Size</InputLabel> */}
+            <FormControl>
               <Select
                 value={this.props.lang}
                 onChange={this.handleSetLanguage}
@@ -389,6 +404,56 @@ class Setting extends React.Component {
             </FormControl>
           </form>
         </div>
+      </div>
+    );
+
+  // preview of check for re-translating
+    var checkRetranslate = (
+      <Dialog
+        open={this.state.askTransAll}
+        aria-labelledby="transall-alert-dialog-title"
+        aria-describedby="transall-alert-dialog-description"
+      >
+        <DialogTitle id='transall-alert-dialog-title'>{this.lang.checkRetranslate}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id='transall-alert-dialog-description'>
+            {this.lang.checkRetranslateContent}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={this.handleCancelCRT} color='primary'>
+            {this.lang.cancel}
+          </Button>
+          <Button onClick={this.handleConfirmCRT} color='primary'>
+            {this.lang.confirm}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+
+  // Setting of auto-translating (tc2sc or sc2tc or none)
+    var readPrefLang = (
+      <div className='setting-block has-shadow'>
+        <div className='setting-inline-text' style={{width: '120px', paddingLeft: '14px', flex: 'none'}}>
+          {this.lang.preferLanguage}
+        </div>
+        <div className='setting-inline-block'>
+          <form>
+            <FormControl>
+              <Select
+                value={this.props.readPrefLang}
+                onChange={this.handleSetReadPrefLang}
+              >
+                <MenuItem value={'auto'}>{this.lang.auto} -- {this.lang.default}</MenuItem>
+                <MenuItem value={'sc2tc'}>{this.lang.sc2tc}</MenuItem>
+                <MenuItem value={'tc2sc'}>{this.lang.tc2sc}</MenuItem>
+                <MenuItem value={'none'}>{this.lang.noTranslate}</MenuItem>
+              </Select>
+            </FormControl>
+            <FormHelperText>{this.lang.retransDescription}</FormHelperText>
+          </form>
+        </div>
+        {checkRetranslate}
       </div>
     );
 
@@ -459,6 +524,7 @@ class Setting extends React.Component {
       </div>
     );
 
+
   // return render content
     return (
       <div className='setting-out container'>
@@ -466,6 +532,8 @@ class Setting extends React.Component {
           {autoLoad}
           {h30}
           {programLanguage}
+          {h1}
+          {readPrefLang}
           {h30}
           {fontSize}
           {h1}
@@ -633,13 +701,13 @@ class Setting extends React.Component {
     this.setState({fontColor: color.hex});
   }
 
-// handleCancleBCCustom 
-  handleCancleBCCustom() {
+// handleCancelBCCustom 
+  handleCancelBCCustom() {
     this.setState({customBCOpen: false});
   }
 
-// handleCancleFCCustom 
-  handleCancleFCCustom() {
+// handleCancelFCCustom 
+  handleCancelFCCustom() {
     this.setState({customFCOpen: false});
   }
 
@@ -678,6 +746,26 @@ class Setting extends React.Component {
       }, 100);
     }, 100);
   }
+
+// handleSetReadPrefLang 
+  handleSetReadPrefLang(event) {
+    this.props.dispatch(setReadingPreferLanguage(event.target.value));
+    if (event.target.value !== 'none')
+      this.setState({askTransAll: true});
+  }
+
+// handleConfirmCRT
+  handleConfirmCRT() {
+    this.setState({askTransAll: false});
+    retranslate(this.props.books, this.props.readPrefLang, this.props.lang, this.props.dispatch, updateAllBooks);
+    this.props.dispatch(setReadingReload(true));
+    this.props.dispatch(setCurBook(translateCurBook(this.props.curBook, this.props.readPrefLang, this.props.lang)));
+  }
+
+// handleCancelCRT
+  handleCancelCRT() {
+    this.setState({askTransAll: false});
+  }
 }
 
 export default connect (state => ({
@@ -690,6 +778,9 @@ export default connect (state => ({
   backgroundPath:  state.setting.backgroundPath,
   fontColor:       state.setting.color,
   navigator:       state.main.navigator,
+  readPrefLang:    state.setting.readingPreferLanguage,
+  books:           state.library.books,
+  curBook:         state.main.curBook,
 }))(
   withStyles(styles)(Setting)
 );

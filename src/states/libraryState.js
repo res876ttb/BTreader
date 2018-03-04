@@ -40,36 +40,36 @@ const initLibraryState = {
     // }
 
     // following objects are examples
-    '/Users/Ricky/Desktop/test/untitle': {
-      addTime: [2018,2,14,9,8,7],
-      author: 'unknown',
-      bookPath: '/Users/Ricky/Desktop/test/untitle',
-      bookTitle: 'untitle',
-      currentChapter: -1,
-      currentChapterOrder: -1,
-      fontSize: 18,
-      lineHeight: 1.5,
-      lastReadTime: [],
-      scrollHeight: 0,
-      scrollTop: 0,
-      source: 'local',
-      totalChapter: 4,
-    },
-    '/Users/Ricky/Desktop/test/快穿女主要上位': {
-      addTime: [2017,1,1,0,0,0],
-      author: "unknown",
-      bookPath: "/Users/Ricky/Desktop/test/快穿女主要上位",
-      bookTitle: "快穿女主要上位",
-      currentChapter: "5.第5章 假千金的逆襲04",
-      currentChapterOrder: 5,
-      fontSize: 18,
-      lineHeight: 1.5,
-      lastReadTime: [2018,2,16,18,18,18],
-      scrollHeight: 0,
-      scrollTop: 0,
-      source: "local",
-      totalChapter: 1210
-    }
+    // '/Users/Ricky/Desktop/test/untitle': {
+    //   addTime: [2018,2,14,9,8,7],
+    //   author: 'unknown',
+    //   bookPath: '/Users/Ricky/Desktop/test/untitle',
+    //   bookTitle: 'untitle',
+    //   currentChapter: -1,
+    //   currentChapterOrder: -1,
+    //   fontSize: 18,
+    //   lineHeight: 1.5,
+    //   lastReadTime: [],
+    //   scrollHeight: 0,
+    //   scrollTop: 0,
+    //   source: 'local',
+    //   totalChapter: 4,
+    // },
+    // '/Users/Ricky/Desktop/test/快穿女主要上位': {
+    //   addTime: [2017,1,1,0,0,0],
+    //   author: "unknown",
+    //   bookPath: "/Users/Ricky/Desktop/test/快穿女主要上位",
+    //   bookTitle: "快穿女主要上位",
+    //   currentChapter: "5.第5章 假千金的逆襲04",
+    //   currentChapterOrder: 5,
+    //   fontSize: 18,
+    //   lineHeight: 1.5,
+    //   lastReadTime: [2018,2,16,18,18,18],
+    //   scrollHeight: 0,
+    //   scrollTop: 0,
+    //   source: "local",
+    //   totalChapter: 1210
+    // }
   },
   recentReading: '',
 }
@@ -146,6 +146,11 @@ export function library(state = initLibraryState, action) {
       return save({
         ...state,
       });
+    case 'library updateAllBooks':
+      return save({
+        ...state,
+        books: action.books,
+      });
     default:
       return state;
   }
@@ -214,4 +219,11 @@ export function libraryInitData() {
   return {
     type: 'library initData',
   };
+}
+
+export function updateAllBooks(books) {
+  return {
+    type: 'library updateAllBooks',
+    books: books,
+  }
 }

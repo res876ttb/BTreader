@@ -61,7 +61,7 @@ export var lang = {
       superLarge: "非常大",
       lineHeight: "行高",
       language: "語言",
-      systemDefault: "系統預設",
+      systemDefault: "系統語言",
       english: "英語 english",
       tchinese: "繁體中文",
       schinese: "簡體中文 简体中文",
@@ -76,6 +76,14 @@ export var lang = {
       fcbcustom: "調色盤",
       previewContent: "文字大小預覽\n以及行距預覽",
       preview: "預覽",
+      preferLanguage: "內文翻譯",
+      sc2tc: "簡轉繁",
+      tc2sc: "繁轉簡",
+      noTranslate: "不翻譯",
+      auto: "自動",
+      checkRetranslate: "翻譯目前書架上的所有書籍？",
+      checkRetranslateContent: "這會重新翻譯您書架上的所有書，這需要花上一段時間。注意，翻譯期間請勿關閉 BTreader。",
+      retransDescription: "若您選擇自動，BTreader 會根據您目前使用的語言翻譯新加入的書籍",
     },
   }
 }
