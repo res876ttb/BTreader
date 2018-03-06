@@ -236,8 +236,8 @@ class Reading extends React.Component {
   }
 
 // set scrollOffset of reading for hiding previous chapter
-  updateScrollTop() {
-    if (this.state.scrollInit === false) {
+  updateScrollTop(updateChapter) {
+    if (this.state.scrollInit === false || updateChapter) {
       var scrollbox = document.getElementById('reading-scrollbox');
       var firstComponent = document.getElementById('reading-content-head');
       var currentComponent = document.getElementById('reading-content-5000');
@@ -245,6 +245,9 @@ class Reading extends React.Component {
       var offset = firstComponent.scrollHeight + 
                    (this.props.book.currentChapterOrder <= 0 ? 0 : 40) + 
                    currentComponent.scrollHeight * this.props.book.scrollTop / this.props.book.scrollHeight;
+      if (updateChapter) {
+        offset = firstComponent.scrollHeight + (this.props.book.currentChapterOrder <= 0 ? 0 : 40);
+      }
       scrollbox.scrollTop = offset;
       this.setState({scrollInit: true});
     }
@@ -523,7 +526,7 @@ class Reading extends React.Component {
         this.props.dispatch(setNavbarCover(0));
       }, 300);
       this.initReading();
-      this.updateScrollTop();
+      this.updateScrollTop(true);
     }, 1);
   }
 
@@ -553,7 +556,61 @@ class Reading extends React.Component {
 
 // handle add bookmark and display adding animation
   handleAddbookmarkButtonClick() {
+    var {idArr, currentIdArrIndex} = this.state;
+    var scrollTop = document.getElementById('reading-scrollbox').scrollTop;
+    var curEle = document.getElementById(idArr[currentIdArrIndex]);
+    var preEle = document.getElementById(idArr[currentIdArrIndex - 1]);
+    var curScrollTop = scrollTop - curEle.offsetTop + (this.props.menuExpand ? 40 : 0);
+    var preScrollTop = scrollTop - preEle.offsetTop + (this.props.menuExpand ? 40 : 0);
 
+    var lineIndex;
+    var formated;
+    var content;
+    if (curScrollTop < 0) {
+      content = preEle.innerText.split('\n');
+      formated = this.formatContent(content, preEle.offsetWidth - 5);
+      lineIndex = Math.floor((preScrollTop) / preEle.offsetHeight * formated.length);
+    } else {
+      content = curEle.innerText.split('\n');
+      formated = this.formatContent(content, curEle.offsetWidth - 5);
+      lineIndex = Math.floor((curScrollTop) / curEle.offsetHeight * formated.length);
+    }
+    var bookmarkContent = this.getBookmarkContent(formated, lineIndex);
+    console.log(bookmarkContent);
+  }
+  formatContent(content, width) {
+    let result = [];
+    for (let i in content) {
+      let curLine = content[i];
+      let formatedLine = '';
+      for (let j in curLine) {
+        let measureWidth = this.measureWidth(formatedLine + curLine[j]);
+        if (measureWidth <= width) {
+          formatedLine += curLine[j];
+        } else {
+          result.push(formatedLine);
+          formatedLine = curLine[j];
+        }
+      }
+      result.push(formatedLine);
+    }
+    return result;
+  }
+  measureWidth(string) {
+    let element = document.createElement('canvas');
+    let context = element.getContext('2d');
+    context.font = this.props.fontSize.toString() + 'px sans-serif';
+    return context.measureText(string).width;
+  }
+  getBookmarkContent(formated, lineIndex) {
+    let result = '';
+    for (let i = lineIndex; i < formated.length; i++) {
+      for (let j in formated[i]) {
+        if (result.length > 99) return result;
+        else result += formated[i][j];
+      }
+    }
+    return result;
   }
 
 // handle jump to certain percentage of current novel
