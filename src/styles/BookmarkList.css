@@ -1,0 +1,70 @@
+/* BookmarkList.css */
+
+.bl-main {
+  border-radius: 10px;
+  width: 200px;
+  height: 200px;
+  background: white;
+}
+
+.bl-item {
+  transition-duration: 0.3s;
+}
+
+.bl-item:hover {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+.bl-item-selected {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+.bl-item-content {
+  line-height: 20px;
+  font-size: 14px;
+  width: 352px;
+  height: 60px;
+  overflow: hidden;
+}
+
+.bl-item-status {
+  line-height: 18px;
+  font-size: 12px;
+  width: 352px;
+}
+
+.bl-item-percentage {
+  display: inline-block;
+  width: 60px;
+}
+
+.bl-item-addTime {
+  display: inline-block;
+  width: 232px;
+  text-align: center;
+}
+
+.bl-item-delete {
+  display: inline-block;
+  width: 54px;
+  margin-right: 6px;
+  border-radius: 9px;
+  text-align: center;
+  color: rgb(192, 3, 3);
+  transition-duration: 200ms;
+}
+
+.bl-item-delete:hover {
+  background-color: rgb(192, 3, 3);
+  color: white;
+}
+
+.bl-item-delete-selected {
+  background-color: rgb(192, 3, 3);
+  color: white;
+}
+
+.bl-item-sep {
+  height: 2px;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.05));
+}

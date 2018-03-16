@@ -276,3 +276,8 @@ function translateAll(books, option, dispatch, update) {
   }
   dispatch(update(newBooks));
 }
+
+export function saveBookmark(path, bookmarks) {
+  var bookmarkPath = path + '-bookmark.json';
+  jf.writeFileSync(bookmarkPath, {bookmark: bookmarks});
+}

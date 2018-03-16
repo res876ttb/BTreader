@@ -11,6 +11,7 @@ const {ipcRenderer} = require('electron');
 // import react components
 import ReadingContent from './ReadingContent.jsx';
 import ChapterList from './ChapterList.jsx';
+import BookmarkList from './BookmarkList.jsx';
 
 // ============================================
 // import react redux-action
@@ -31,10 +32,14 @@ import {
 import {
   readChapter,
   readIndex,
+  saveBookmark,
 } from '../utils/fileUtilities.js';
 import {
   getCurrentTime,
 } from '../utils/clockUtilities.js';
+import {
+  isEmptyLine,
+} from '../utils/wordProcess.js';
 
 // ============================================
 // import css file
@@ -73,46 +78,48 @@ class Reading extends React.Component {
     this.handleJumpButtonClick = this.handleJumpButtonClick.bind(this);
     this.handleSearchButtonClick = this.handleSearchButtonClick.bind(this);
     this.handleAddbookmarkButtonClick = this.handleAddbookmarkButtonClick.bind(this);
+    this.deleteBookmark = this.deleteBookmark.bind(this);
+    this.jumpToBookmark = this.jumpToBookmark.bind(this);
 
     // declare state and type/default value
     this.state = {
-      index: {}, // index for chapter and bookmark
-      bookTitle: '', // book title
+      index: {},                // index for chapter and bookmark
+      bookTitle: '',            // book title
       
-      prevContent: '', // content of current first chapter
-      nextContent: '', // content of current last chapter
+      prevContent: '',          // content of current first chapter
+      nextContent: '',          // content of current last chapter
 
-      components: [], // reading content div
-      fromBase: 0, // how many chapters are there from base chapter to last chapter
-      toBase: 0,   // how many chapters are there from first chapter to base chapter
+      components: [],           // reading content div
+      fromBase: 0,              // how many chapters are there from base chapter to last chapter
+      toBase: 0,                // how many chapters are there from first chapter to base chapter
       
-      currentChapter: '', // current chapter
-      currentChapterOrder: -1, // index of current chapter in index.chapter
-      firstChapterOrder: -1, // for loading previous chapter
-      lastChapterOrder: -1,  // for loading next chapter
+      currentChapter: '',       // current chapter
+      currentChapterOrder: -1,  // index of current chapter in index.chapter
+      firstChapterOrder: -1,    // for loading previous chapter
+      lastChapterOrder: -1,     // for loading next chapter
       
-      idArr: [], // id array for components
-      currentIdArrIndex: -1, // index of id of current visible component
+      idArr: [],                // id array for components
+      currentIdArrIndex: -1,    // index of id of current visible component
 
-      scrollInit: true, // for change current scroll offset. When true, 
-      loadLock: false, // lock checkIfLoading to prevent double/triple loading
+      scrollInit: true,         // for change current scroll offset. When true, 
+      loadLock: false,          // lock checkIfLoading to prevent double/triple loading
 
-      chapterState: 0, // for displaying chapter
-      bookmarkState: 0, // for displaying bookmark
-      jumpState: 0, // for displaying jump
-      searchState: 0, // for displaying searchbar 
-      // 0 for close; 1 for opening animation; 2 for open; 3 for closing animation
-      addBookmarkState: 0, // for displaying animation of adding bookmark
-      // 0 for close; 1 for sliding in; 2 for sliding out
+      chapterState: 0,          // for displaying chapter
+      bookmarkState: false,     // for displaying bookmark
+      jumpState: 0,             // for displaying jump
+      searchState: 0,           // for displaying searchbar 
+                                // 0 for close; 1 for opening animation; 2 for open; 3 for closing animation
+      addBookmarkState: 0,      // for displaying animation of adding bookmark
+                                // 0 for close; 1 for sliding in; 2 for sliding out
 
       noRecent: false, 
 
-      notSave: false, // flag for saving reading progress
+      notSave: false,           // flag for saving reading progress
       
-      firstIsLoad: false, // flag for if first chapter is loaded. It is needed because 
-                          // checkIfLoad has some limits that cannot detected if previous
-                          // chapter is needed to be loaded when the first chapter cannot 
-                          // fill up the whole height.
+      firstIsLoad: false,       // flag for if first chapter is loaded. It is needed because 
+                                // checkIfLoad has some limits that cannot detected if previous
+                                // chapter is needed to be loaded when the first chapter cannot 
+                                // fill up the whole height.
     };
   }
 
@@ -230,12 +237,19 @@ class Reading extends React.Component {
           currentChapter={this.state.currentChapter}
           bookTitle={this.props.book.bookTitle}
         />
-        {/* <Bookmark /> */}
+        <BookmarkList 
+          bookmarks={this.state.index.bookmark}
+          bookmarkState={this.state.bookmarkState}
+          handleBookmarkButtonClick={this.handleBookmarkButtonClick}
+          deleteBookmark={this.deleteBookmark}
+          handleJumpToBookmark={this.jumpToBookmark}
+        />
       </div>
     );
   }
 
-// set scrollOffset of reading for hiding previous chapter
+// updateScrollTop
+  // set scrollOffset of reading for hiding previous chapter
   updateScrollTop(updateChapter) {
     if (this.state.scrollInit === false || updateChapter) {
       var scrollbox = document.getElementById('reading-scrollbox');
@@ -253,7 +267,8 @@ class Reading extends React.Component {
     }
   }
 
-// read novel and create component
+// initReading
+  // read novel and create component
   initReading() {
     if (this.props.book === null || this.props.book === undefined) {
       console.log('Current book is not recognizable');
@@ -326,7 +341,8 @@ class Reading extends React.Component {
       }));
   }}}
 
-// check if loading next chapter and checking which is current chapter
+// checkIfLoading
+  // check if loading next chapter and checking which is current chapter
   checkIfLoading() {
     if (this.state.scrollInit === false || this.state.loadLock) return;
     var a          = document.getElementById('reading-scrollbox').scrollTop;
@@ -381,7 +397,8 @@ class Reading extends React.Component {
     }
   }}
 
-// handle load next chapter
+// loadNextChapter
+  // handle load next chapter
   loadNextChapter() {
     console.log('Load Next Chapter');
     this.setState({loadLock: true});
@@ -440,7 +457,8 @@ class Reading extends React.Component {
     // this.props.dispatch(setNavTitle(this.state.index.chapter[ncco]));
   }
 
-// load previous page
+// loadPreviousChapter
+  // load previous chapter
   loadPreviousChapter() {
     console.log('Load Previous Chapter');
     this.setState({loadLock: true});
@@ -508,14 +526,15 @@ class Reading extends React.Component {
     }, 10);
   }
 
-// jump to certain chapter
+// jumpToChapter
+  // jump to certain chapter
   jumpToChapter(chapter, chapterOrder) {
-    console.log('jump to', chapter);
+    console.log('jump to chapter', chapter);
     this.props.dispatch(setCurBook({
       ...this.props.book,
       currentChapter: chapter,
       currentChapterOrder: chapterOrder,
-      offsetTop: 0,
+      scrollTop: 0,
       scrollHeight: 0,
     }));
     setTimeout(() => {
@@ -530,7 +549,25 @@ class Reading extends React.Component {
     }, 1);
   }
 
-// handle if chapterlist will display
+// jumpToBookmark
+  // handle bookmark click event
+  jumpToBookmark(bookmark) {
+    console.log('jump to bookmark:', bookmark.content);
+    this.props.dispatch(setCurBook({
+      ...this.props.book,
+      currentChapter: bookmark.currentChapter,
+      currentChapterOrder: bookmark.currentChapterOrder,
+      scrollTop: bookmark.scrollTop,// + (this.props.menuExpand ? 40 : 0),
+      scrollHeight: bookmark.scrollHeight,
+    }));
+    setTimeout(() => {
+      this.initReading();
+      this.updateScrollTop();
+    }, 1);
+  }
+
+// handleChapterButtonClick 
+  // handle display of if chapterlist 
   handleChapterButtonClick() {
     if (this.state.chapterState === 0) {
       this.setState({chapterState: 1});
@@ -549,35 +586,98 @@ class Reading extends React.Component {
     }
   }
 
-// handle is bookmark list will display
+// handleBookmarkButtonClick
+  // handle is bookmark list will display
   handleBookmarkButtonClick() {
-
+    if (this.state.bookmarkState === true) {
+      this.setState({bookmarkState: false});
+    } else {
+      this.setState({bookmarkState: true});
+    }
   }
 
-// handle add bookmark and display adding animation
+// handleAddbookmarkButtonClick
+  // handle add bookmark and display adding animation
   handleAddbookmarkButtonClick() {
     var {idArr, currentIdArrIndex} = this.state;
-    var scrollTop = document.getElementById('reading-scrollbox').scrollTop;
-    var curEle = document.getElementById(idArr[currentIdArrIndex]);
-    var preEle = document.getElementById(idArr[currentIdArrIndex - 1]);
+    var scrollTop    = document.getElementById('reading-scrollbox').scrollTop;
+    var curEle       = document.getElementById(idArr[currentIdArrIndex]);
+    var preEle       = document.getElementById(idArr[currentIdArrIndex - 1]);
+    var nextEle      = document.getElementById(idArr[currentIdArrIndex + 1]);
     var curScrollTop = scrollTop - curEle.offsetTop + (this.props.menuExpand ? 40 : 0);
     var preScrollTop = scrollTop - preEle.offsetTop + (this.props.menuExpand ? 40 : 0);
 
     var lineIndex;
     var formated;
     var content;
-    if (curScrollTop < 0) {
+    var bookmarkContent;
+    var newBookmark;
+    if (curScrollTop < 0) { // if current chapter is below top edge
       content = preEle.innerText.split('\n');
       formated = this.formatContent(content, preEle.offsetWidth - 5);
       lineIndex = Math.floor((preScrollTop) / preEle.offsetHeight * formated.length);
+      bookmarkContent = this.getBookmarkContent(formated, lineIndex);
+      // if bookmarkContent is empty, then try to get content of previous content
+      if (isEmptyLine(bookmarkContent)) { 
+        bookmarkContent = this.getBookmarkContent(curEle.innerText, 0);  
+        newBookmark = {
+          currentChapter: this.state.currentChapter,
+          currentChapterOrder: this.state.currentChapterOrder,
+          scrollTop: 0,
+          scrollHeight: curEle.scrollHeight,
+          content: bookmarkContent,
+          addTime: getCurrentTime(),
+        };
+      } else { 
+        newBookmark = {
+          currentChapter: this.state.index.chapter[this.state.currentChapterOrder - 1],
+          currentChapterOrder: this.state.currentChapterOrder - 1,
+          scrollTop: preScrollTop,
+          scrollHeight: preEle.scrollHeight,
+          content: bookmarkContent,
+          addTime: getCurrentTime(),
+        };
+      }
     } else {
       content = curEle.innerText.split('\n');
       formated = this.formatContent(content, curEle.offsetWidth - 5);
       lineIndex = Math.floor((curScrollTop) / curEle.offsetHeight * formated.length);
+      bookmarkContent = this.getBookmarkContent(formated, lineIndex);
+      // if bookmarkContent is empty, then try to get content of next chapter
+      if (isEmptyLine(bookmarkContent)) {
+        bookmarkContent = this.getBookmarkContent(nextEle.innerText, 0);
+        newBookmark = {
+          currentChapter: this.state.index.chapter[this.state.currentChapterOrder + 1],
+          currentChapterOrder: this.state.currentChapterOrder + 1,
+          scrollTop: 0,
+          scrollHeight: nextEle.scrollHeight,
+          content: bookmarkContent,
+          addTime: getCurrentTime(),
+        };
+      } else {
+        newBookmark = {
+          currentChapter: this.state.currentChapter,
+          currentChapterOrder: this.state.currentChapterOrder,
+          scrollTop: curScrollTop,
+          scrollHeight: curEle.scrollHeight,
+          content: bookmarkContent,
+          addTime: getCurrentTime(),
+        };
+      }
     }
-    var bookmarkContent = this.getBookmarkContent(formated, lineIndex);
-    console.log(bookmarkContent);
+    
+    var bookmarks = this.state.index.bookmark.slice();
+    bookmarks.push(newBookmark);
+    this.setState({index: {
+      bookmark: bookmarks,
+      chapter: this.state.index.chapter,
+    }});
+    setTimeout(() => {
+      saveBookmark(this.props.book.bookPath, this.state.index.bookmark);
+    }, 1);
   }
+  // formatContent
+  // simulating browser typesetting
   formatContent(content, width) {
     let result = [];
     for (let i in content) {
@@ -596,12 +696,16 @@ class Reading extends React.Component {
     }
     return result;
   }
+  // measureWidth
+  // measure width of current line by using canvas
   measureWidth(string) {
     let element = document.createElement('canvas');
     let context = element.getContext('2d');
     context.font = this.props.fontSize.toString() + 'px sans-serif';
     return context.measureText(string).width;
   }
+  // getBookmarkContent
+  // get preview content of bookmark from current page
   getBookmarkContent(formated, lineIndex) {
     let result = '';
     for (let i = lineIndex; i < formated.length; i++) {
@@ -613,17 +717,34 @@ class Reading extends React.Component {
     return result;
   }
 
-// handle jump to certain percentage of current novel
+// handleJumpButtonClick
+  // handle jump to certain percentage of current novel
   handleJumpButtonClick() {
-
+    
   }
 
-// handle if search page is display
+// handleSearchButtonClick
+  // handle if search page is display
   handleSearchButtonClick() {
     
   }
 
-// save current book into disk
+// deleteBookmark
+  // delete certain bookmark
+  deleteBookmark(addTime) {
+    let bookmarks = this.state.index.bookmark.slice();
+    bookmarks = bookmarks.filter(bookmark => bookmark.addTime !== addTime);
+    this.setState({index:{
+      bookmark: bookmarks,
+      chapter: this.state.index.chapter,
+    }});
+    setTimeout(() => {
+      saveBookmark(this.props.book.bookPath, this.state.index.bookmark);
+    }, 1);
+  }
+
+// saveBook
+  // save current book into disk
   saveBook() {
     if (this.props.book !== null && this.props.book !== undefined && this.state.noRecent === false) {
       var idArr = this.state.idArr;
@@ -664,11 +785,12 @@ bookmark: [
   {
     currentChapter: string,
     currentChapterOrder: number,
-    offsetTop: number,
-    scrollHeight: number,
-    content: string,
-    addTime: [year, month, day, hour, minute, second],
-    progress: number, // percentage of whole book
+    scrollTop: number,                                  // position in current chapter
+    scrollHeight: number,                               // scroll height of current chapter
+    content: string,                                    // preview in bookmark list
+    addTime: [year, month, day, hour, minute, second],  // for displaying in bookmark list
+    progress: number, // percentage of whole book, but not need to be store in bookmark. 
+                      // Calculated when bookmark is going go be rendered.
   }, {
   ...
 ]
