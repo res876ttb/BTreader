@@ -12,6 +12,11 @@ const {ipcRenderer} = require('electron');
 import ReadingContent from './ReadingContent.jsx';
 import ChapterList from './ChapterList.jsx';
 import BookmarkList from './BookmarkList.jsx';
+import Dialog, { DialogTitle, DialogActions } from 'material-ui/Dialog';
+import { FormControl, FormHelperText } from 'material-ui/Form';
+import Input, { InputAdornment } from 'material-ui/Input';
+import Button from 'material-ui/Button';
+import TextField from 'material-ui/TextField';
 
 // ============================================
 // import react redux-action
@@ -80,6 +85,8 @@ class Reading extends React.Component {
     this.handleAddbookmarkButtonClick = this.handleAddbookmarkButtonClick.bind(this);
     this.deleteBookmark = this.deleteBookmark.bind(this);
     this.jumpToBookmark = this.jumpToBookmark.bind(this);
+    this.jumpToProgress = this.jumpToProgress.bind(this);
+    this.handleJumpBoxInput = this.handleJumpBoxInput.bind(this);
 
     // declare state and type/default value
     this.state = {
@@ -107,7 +114,8 @@ class Reading extends React.Component {
       chapterState: 0,          // for displaying chapter
       bookmarkState: false,     // for displaying bookmark
       bookmarkAnimation: 0,     // for displaying animation of bookmark
-      jumpState: 0,             // for displaying jump
+      jumpState: false,             // for displaying jump
+      jumpProgress: '',
       searchState: 0,           // for displaying searchbar 
                                 // 0 for close; 1 for opening animation; 2 for open; 3 for closing animation
       addBookmarkState: 0,      // for displaying animation of adding bookmark
@@ -230,6 +238,7 @@ class Reading extends React.Component {
           </div>
         </div>
 
+        {/* ChapterList component */}
         <ChapterList 
           chapters={this.state.index.chapter} 
           jumpToChapter={this.jumpToChapter} 
@@ -238,6 +247,8 @@ class Reading extends React.Component {
           currentChapter={this.state.currentChapter}
           bookTitle={this.props.book.bookTitle}
         />
+
+        {/* BookmarkList component */}
         <BookmarkList 
           bookmarks={this.state.index.bookmark}
           bookmarkState={this.state.bookmarkState}
@@ -245,6 +256,8 @@ class Reading extends React.Component {
           deleteBookmark={this.deleteBookmark}
           handleJumpToBookmark={this.jumpToBookmark}
         />
+
+        {/* Animation of adding new bookmark */}
         <div className={'reading-bookmark-animation' + (
           this.state.bookmarkAnimation === 1 ? ' rba-slidein' :
           this.state.bookmarkAnimation === 2 ? ' rba-show' :
@@ -253,6 +266,29 @@ class Reading extends React.Component {
         )}>
           <i className={'fas fa-bookmark'}></i>
         </div>
+
+        {/* input box of jumping feature */}
+        <Dialog
+          open={this.state.jumpState}
+          onClose={this.handleJumpButtonClick}
+        >
+          <DialogTitle>{this.lang.jumpBox}</DialogTitle>
+          <div style={{margin: '0px 24px'}}>
+            <FormControl>
+              <Input 
+                value={this.state.jumpProgress}
+                endAdornment={<InputAdornment position="end">%</InputAdornment>}
+                placeholder={this.lang.jumpBoxPlaceholder}
+                onKeyDown={this.handleJumpBoxInput}
+              />
+              <FormHelperText>{this.lang.jumpBoxHelper}</FormHelperText>
+            </FormControl>
+          </div>
+          <DialogActions>
+            <Button onClick={this.handleJumpButtonClick}>{this.lang.cancel}</Button>
+            <Button onClick={this.jumpToProgress}>{this.lang.confirm}</Button>
+          </DialogActions>
+        </Dialog>
       </div>
     );
   }
@@ -575,6 +611,37 @@ class Reading extends React.Component {
     }, 1);
   }
 
+// jumpToProgress
+  // handle progress jump
+  jumpToProgress() {
+
+    if (this.state.jumpProgress.length === 0) {
+      this.setState({jumpState: false, jumpProgress: ''});
+      return;
+    }
+    console.log('Jump to progress', this.state.jumpProgress);
+    if (isNaN(Number(this.state.jumpProgress))) {
+      console.error('in function "jumpToProgress": Input is not a number!');
+      return;
+    }
+    let progress = this.props.book.totalChapter * Number(this.state.jumpProgress) / 100;
+    let chapterOrder = Math.floor(progress);
+    let scrollTop = Number(((progress - chapterOrder) * 1000).toFixed(0));
+    let scrollHeight = 1000;
+    this.setState({jumpState: false, jumpProgress: ''});
+    this.props.dispatch(setCurBook({
+      ...this.props.book,
+      currentChapter: this.state.index.chapter[chapterOrder],
+      currentChapterOrder: chapterOrder,
+      scrollTop: scrollTop,
+      scrollHeight: scrollHeight,
+    }));
+    setTimeout(() => {
+      this.initReading();
+      this.updateScrollTop();
+    }, 1);  
+  }
+
 // handleChapterButtonClick 
   // handle display of if chapterlist 
   handleChapterButtonClick() {
@@ -741,13 +808,44 @@ class Reading extends React.Component {
 // handleJumpButtonClick
   // handle jump to certain percentage of current novel
   handleJumpButtonClick() {
-    
+    if (this.state.jumpState === true) {
+      this.setState({jumpState: false});
+    } else {
+      this.setState({jumpState: true, jumpProgress: ''});
+    }
   }
 
 // handleSearchButtonClick
   // handle if search page is display
   handleSearchButtonClick() {
     
+  }
+
+// handleJumpBoxInput
+  // handle input formatof jump input box
+  handleJumpBoxInput(e) {
+    let keyCode = e.keyCode | e.which;
+    let jp = this.state.jumpProgress;
+    if (keyCode === 13) {
+      this.jumpToProgress();
+    } else if (keyCode === 8 && jp.length > 0) {
+      this.setState({jumpProgress: jp.slice(0, jp.length - 1)});
+    }
+    if (jp[1] === '.' && jp.length > 4) return;
+    if (jp[2] === '.' && jp.length > 5) return;
+    if (keyCode >= 48 && keyCode <= 57) {
+      if (jp === '0' || (jp.length === 2) && jp.indexOf('.') === -1) {
+        this.setState({jumpProgress: jp + '.' + (keyCode - 48).toString()});
+      } else {
+        this.setState({jumpProgress: jp + (keyCode - 48).toString()});
+      }
+    } else if (keyCode === 190) {
+      if (jp.length === 0) {
+        this.setState({jumpProgress: '0.'});
+      } else if (jp.indexOf('.') === -1 && jp.length < 3) {
+        this.setState({jumpProgress: jp + '.'});
+      } 
+    }
   }
 
 // deleteBookmark

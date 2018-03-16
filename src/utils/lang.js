@@ -45,7 +45,12 @@ export var lang = {
       nochapter: "本書無任何可用章節",
     },
     Reading: {
-      norecent: "沒有最近的閱讀紀錄！趕快到書架選一本書來閱讀吧！您也可以透過線上書庫來閱讀您喜歡的書。"
+      norecent: "沒有最近的閱讀紀錄！趕快到書架選一本書來閱讀吧！您也可以透過線上書庫來閱讀您喜歡的書。",
+      jumpBox: "跳轉",
+      cancel: "取消",
+      confirm: "確認",
+      jumpBoxPlaceholder: "進度百分比",
+      jumpBoxHelper: "將閱讀進度跳轉到您指定的百分比", 
     },
     Setting: {
       yes: "是",
@@ -91,6 +96,7 @@ export var lang = {
       confirmDelete: "確認刪除這個書籤？",
       confirm: "確認",
       cancel: "取消",
+      noBookmark: "這本書現在沒有書籤",
     },
   }
 }
