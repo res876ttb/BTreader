@@ -26,6 +26,10 @@ html {
                                    supported by Chrome and Opera */
 }
 
+body {
+  font-family: 'PingFang TC', 'Arial', 'LiHei Pro', 'Microsoft JhengHei' !important;
+}
+
 #root {
   height: 100vh;
   transition-duration: 300ms;

@@ -30,7 +30,7 @@ export function isChapterLine(line) {
   var i = 0;
   while (line[i] === ' ' || line[i] === '\t') i++;
   var test = line.slice(i,i+12);
-  return test.match(/^第?\s*[\d一二三四五六七八九十百千萬万兩两零]+\s*[章節][\s\n]/) !== null ||
+  return test.match(/^第?\s*[\d一二三四五六七八九十百千萬万兩两零]+\s*[章節]\s*\n?/) !== null ||
          test.match(/^\d*\./) !== null ||
          test.match(/^[Cc]hapter\.?\s*[\dIVX]{1,5}/) !== null;
 }

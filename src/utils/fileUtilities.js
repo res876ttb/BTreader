@@ -44,7 +44,13 @@ export function getCurPath() {
 
 
   // debug:
-  window.appPath = '/Users/Ricky/Desktop/test/';
+  if (navigator.appVersion.indexOf('Win') !== -1) {
+    window.appPath = 'C:/Users/Ricky/Desktop/test/';
+  } else if (navigator.appVersion.indexOf('Mac') !== -1) {
+    window.appPath = '/Users/Ricky/Desktop/test/'; 
+  } else {
+    window.appPath = '/Users/Ricky/Desktop/test/';
+  }
 }
 
 export function newLocal() {

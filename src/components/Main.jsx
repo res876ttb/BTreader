@@ -79,6 +79,7 @@ class Main extends React.Component {
 
   componentWillMount() {
     // get application path
+    setHostType();
     getCurPath();
 
     // load data from application path
