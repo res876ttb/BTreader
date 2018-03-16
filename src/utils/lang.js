@@ -42,7 +42,7 @@ export var lang = {
     },
     ChapterList: {
       title: "章節列表", 
-      nochapter: "本書無任何可用章節",
+      nochapter: "無法辨識這本書的章節",
     },
     Reading: {
       norecent: "沒有最近的閱讀紀錄！趕快到書架選一本書來閱讀吧！您也可以透過線上書庫來閱讀您喜歡的書。",

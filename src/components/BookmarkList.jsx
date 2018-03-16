@@ -75,7 +75,10 @@ class BookmarkList extends React.Component {
       >
         <DialogTitle>{this.lang.title}</DialogTitle>
         <div style={{width: '400px', padding: '0px 24px', overflow: 'scroll'}}>
-          {bookmarkComponents}
+          {bookmarkComponents.length > 0 ? bookmarkComponents :
+          <div style={{textAlign: 'center'}}>
+            {this.lang.noBookmark}
+          </div>}
         </div>
         <div style={{height: '24px', minHeight: '24px'}}></div>
         <Dialog
