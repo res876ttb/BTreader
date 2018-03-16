@@ -106,6 +106,7 @@ class Reading extends React.Component {
 
       chapterState: 0,          // for displaying chapter
       bookmarkState: false,     // for displaying bookmark
+      bookmarkAnimation: 0,     // for displaying animation of bookmark
       jumpState: 0,             // for displaying jump
       searchState: 0,           // for displaying searchbar 
                                 // 0 for close; 1 for opening animation; 2 for open; 3 for closing animation
@@ -244,6 +245,14 @@ class Reading extends React.Component {
           deleteBookmark={this.deleteBookmark}
           handleJumpToBookmark={this.jumpToBookmark}
         />
+        <div className={'reading-bookmark-animation' + (
+          this.state.bookmarkAnimation === 1 ? ' rba-slidein' :
+          this.state.bookmarkAnimation === 2 ? ' rba-show' :
+          this.state.bookmarkAnimation === 3 ? ' rba-slideout' :
+          ' rba-hide'
+        )}>
+          <i className={'fas fa-bookmark'}></i>
+        </div>
       </div>
     );
   }
@@ -550,7 +559,7 @@ class Reading extends React.Component {
   }
 
 // jumpToBookmark
-  // handle bookmark click event
+  // handle bookmark click event: jump to the destination
   jumpToBookmark(bookmark) {
     console.log('jump to bookmark:', bookmark.content);
     this.props.dispatch(setCurBook({
@@ -599,6 +608,18 @@ class Reading extends React.Component {
 // handleAddbookmarkButtonClick
   // handle add bookmark and display adding animation
   handleAddbookmarkButtonClick() {
+    if (this.state.bookmarkAnimation !== 0) return;
+    this.setState({bookmarkAnimation: 1});
+    setTimeout(() => {
+      this.setState({bookmarkAnimation: 2});
+      setTimeout(() => {
+        this.setState({bookmarkAnimation: 3});
+        setTimeout(() => {
+          this.setState({bookmarkAnimation: 0});
+        }, 300);
+      }, 300);
+    }, 300);
+
     var {idArr, currentIdArrIndex} = this.state;
     var scrollTop    = document.getElementById('reading-scrollbox').scrollTop;
     var curEle       = document.getElementById(idArr[currentIdArrIndex]);
