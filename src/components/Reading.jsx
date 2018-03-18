@@ -87,6 +87,8 @@ class Reading extends React.Component {
     this.jumpToBookmark = this.jumpToBookmark.bind(this);
     this.jumpToProgress = this.jumpToProgress.bind(this);
     this.handleJumpBoxInput = this.handleJumpBoxInput.bind(this);
+    this.handleSearching = this.handleSearching.bind(this);
+    this.handleSearchBoxInput = this.handleSearchBoxInput.bind(this);
 
     // declare state and type/default value
     this.state = {
@@ -114,10 +116,10 @@ class Reading extends React.Component {
       chapterState: 0,          // for displaying chapter
       bookmarkState: false,     // for displaying bookmark
       bookmarkAnimation: 0,     // for displaying animation of bookmark
-      jumpState: false,             // for displaying jump
-      jumpProgress: '',
-      searchState: 0,           // for displaying searchbar 
-                                // 0 for close; 1 for opening animation; 2 for open; 3 for closing animation
+      jumpState: false,         // for displaying jump
+      jumpProgress: '',         // progress for jumping
+      searchState: false,       // for displaying searchbar 
+      searchComplete: false,    // for searching state. if searching has completed, true; else false.
       addBookmarkState: 0,      // for displaying animation of adding bookmark
                                 // 0 for close; 1 for sliding in; 2 for sliding out
 
@@ -206,7 +208,7 @@ class Reading extends React.Component {
           <div className='reading-buttonbar-in'>
             <div className='reading-buttonbar-bottom'>
               <div className='reading-button-search reading-button'
-                onClick={this.handleSearchButtonClick}
+                // onClick={this.handleSearchButtonClick}
               >
                 <i className='fas fa-search'></i>
               </div>
@@ -287,6 +289,28 @@ class Reading extends React.Component {
           <DialogActions>
             <Button onClick={this.handleJumpButtonClick}>{this.lang.cancel}</Button>
             <Button onClick={this.jumpToProgress}>{this.lang.confirm}</Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* input box of search feature */}
+        <Dialog
+          open={this.state.searchState}
+          onClose={this.handleSearchButtonClick}
+        >
+          <DialogTitle>{this.lang.searchBox}</DialogTitle>
+          <div style={{margin: '0px 24px'}}>
+            <FormControl>
+              <Input 
+                id='reading-searchbox-input'
+                placeholder={this.lang.searchBoxPlaceholder}
+                onKeyDown={this.handleSearchBoxInput}
+              />
+              <FormHelperText>{this.lang.searchBoxHelper}</FormHelperText>
+            </FormControl>
+          </div>
+          <DialogActions>
+            <Button onClick={this.handleSearchButtonClick}>{this.lang.cancel}</Button>
+            <Button onClick={this.handleSearching}>{this.lang.confirm}</Button>
           </DialogActions>
         </Dialog>
       </div>
@@ -818,7 +842,33 @@ class Reading extends React.Component {
 // handleSearchButtonClick
   // handle if search page is display
   handleSearchButtonClick() {
-    
+    if (this.state.searchState === true) {
+      this.setState({searchState: false});
+    } else {
+      this.setState({searchState: true});
+    }
+  }
+
+// handleSearching
+  // search matching string in local files
+  handleSearching() {
+    let value = document.getElementById('reading-serachbox-input').value;
+    this.setState({searchComplete: false});
+
+  }
+
+  handleSearchBoxInput(e) {
+    let keyCode = e.keyCode | e.which;
+    if (keyCode === 13) {
+      let value = document.getElementById('reading-searchbox-input').value;
+      if (value === '') {
+        console.log('Reading: handleSearchBoxInput: empty input.');
+        this.handleSearchButtonClick();
+      } else {
+        console.log('start to search "' + value + '" in local files');
+        this.handleSearching();
+      }
+    }
   }
 
 // handleJumpBoxInput

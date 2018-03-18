@@ -86,6 +86,7 @@
 /* search */
 .reading-button-search {
   bottom: 280px;
+  opacity: 0;
 }
 
 .reading-button-search:hover {

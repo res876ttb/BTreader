@@ -46,11 +46,14 @@ export var lang = {
     },
     Reading: {
       norecent: "沒有最近的閱讀紀錄！趕快到書架選一本書來閱讀吧！您也可以透過線上書庫來閱讀您喜歡的書。",
-      jumpBox: "跳轉",
       cancel: "取消",
       confirm: "確認",
-      jumpBoxPlaceholder: "進度百分比",
+      jumpBox: "跳轉",
       jumpBoxHelper: "將閱讀進度跳轉到您指定的百分比", 
+      jumpBoxPlaceholder: "進度百分比",
+      searchBox: "搜尋內文",
+      searchBoxHelper: "若目前閱讀書籍線上，則僅能搜尋以閱讀過的章節",
+      searchBoxPlaceholder: "搜尋",
     },
     Setting: {
       yes: "是",
