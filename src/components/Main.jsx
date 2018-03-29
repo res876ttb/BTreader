@@ -95,7 +95,7 @@ class Main extends React.Component {
       // after data is loaded, display loading animation
       if (this.state.debug) {
         this.setState({dataLoaded1: true, dataLoaded2: true});
-        this.props.dispatch(setNavigator('/library'));
+        this.props.dispatch(setNavigator('/online'));
       } else {
         // use setTimeout on the outter layer is for making it synchronous.
         if (this.props.autoLoad === true) {

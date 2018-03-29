@@ -123,7 +123,7 @@ class ChapterList extends React.Component {
     this.props.chapters.map(chapter => {
       let order = chapterOrder;
       chapters.push(
-        <div key={chapter} id={chapter}>
+        <div key={Math.random().toString(36).substring(2)} id={chapter}>
           <div 
             className='chapterlist-chapteritem' 
             onClick={() => this.handleChapterClick(chapter, order)}
@@ -144,7 +144,7 @@ class ChapterList extends React.Component {
       chapters.pop();
       chapters.push(
         <div 
-          key={chapter}
+          key={Math.random().toString(36).substring(2)}
           id={chapter} 
           className='chapterlist-chapteritem'
           onClick={() => this.handleChapterClick(chapter, order)}

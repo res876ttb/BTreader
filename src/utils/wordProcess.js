@@ -29,9 +29,9 @@ export function processLine(line) {
 export function isChapterLine(line) {
   var i = 0;
   while (line[i] === ' ' || line[i] === '\t') i++;
-  var test = line.slice(i,i+12);
-  return test.match(/^第?\s*[\d一二三四五六七八九十百千萬万兩两零]+\s*[章節]\s*\n?/) !== null ||
-         test.match(/^\d*\./) !== null ||
+  var test = line.slice(i,i+20);
+  return test.match(/^(第?\s*[\d一二三四五六七八九十百千萬万兩两零]+\s*卷\s*.*\s+)?第?\s*[\d一二三四五六七八九十百千萬万兩两零]+\s*[章節]\s*\n?/) !== null ||
+         test.match(/^\d+\./) !== null ||
          test.match(/^[Cc]hapter\.?\s*[\dIVX]{1,5}/) !== null;
 }
 
@@ -74,4 +74,9 @@ function _translateCurBook(book, option) {
     author:         translate(book.author),
     currentChapter: translate(book.currentChapter),
   }
+}
+
+export function ifMatchPrevChapterName(str1, str2) {
+  if (str1 === '') return true;
+  return str1.match(str2) === null && str2.match(str1) === null;
 }

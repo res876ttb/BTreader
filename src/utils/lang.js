@@ -101,5 +101,15 @@ export var lang = {
       cancel: "取消",
       noBookmark: "這本書現在沒有書籤",
     },
+    Online: {
+      search: "搜尋",
+      bookTitle: "書名",
+      author: "作者",
+      searchFor: "分類",
+    },
+    OnlineListItem: {
+      inSerial: "連載中",
+      notInSerial: "已完結"
+    }
   }
 }

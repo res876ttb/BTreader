@@ -18,6 +18,7 @@ const {
   processLine,
   isChapterLine,
   processChapterLine,
+  ifMatchPrevChapterName,
 } = require('./wordProcess.js');
 
 // functions
@@ -74,22 +75,31 @@ export function processLocal(path, bookTitle, lang, readPrefLang) {
         resolve(readResult);
       });
     });
+  }).catch(error => {
+    console.error('Error occurs when get a part of file:', error);
+
   }).then(content => {
     // get encoding
     let encoding = jcd.detect(content).encoding.toLowerCase();
     console.log('Detected encoding:', encoding);
     return encoding;
+  }).catch(error => {
+    console.error('Error occurs when get encoding:', error);
 
   }).then(encoding => {
     // read file content
     let content = fs.readFileSync(path);
     return [encoding, content];
+  }).catch(error => {
+    console.error('Error occurs when reading whole book:', error);
 
   }).then(v => {
     // decoding file content
     let encoding = v[0];
     let content  = v[1];
     return iconv.decode(content, encoding);
+  }).catch(error => {
+    console.error('Error occurs when decoding file content:', error);
 
   }).then(content => {
     // translating file content
@@ -114,6 +124,8 @@ export function processLocal(path, bookTitle, lang, readPrefLang) {
     } else {
       return content.split(/\r?\n/);
     }
+  }).catch(e => {
+    console.error('Error occurs when translating file content:', error);
 
   }).then(content => {
     // remove empty line and replace empty line head with 4 space. 
@@ -121,6 +133,7 @@ export function processLocal(path, bookTitle, lang, readPrefLang) {
     let processed = {
       0: '',
     };
+    let prevChapterName = '';
     let chapterList = ['0'];
     for (let l in content) {
       let line = content[l];
@@ -128,20 +141,26 @@ export function processLocal(path, bookTitle, lang, readPrefLang) {
         let processedLine = processLine(line);
         if (isChapterLine(processedLine) !== false) {
           let chapterLine = processChapterLine(processedLine);
-          chapterList.push(chapterLine);
-          processed[chapterList.length - 1] = '';
+          if (ifMatchPrevChapterName(prevChapterName, chapterLine)) {
+            chapterList.push(chapterLine);
+            prevChapterName = chapterLine;
+            processed[chapterList.length - 1] = '';
+          } else {
+            processed[chapterList.length - 1] += processedLine + '\n';  
+          }
         } else {
           processed[chapterList.length - 1] += processedLine + '\n';
         }
       }
     }
     return {processed, chapterList};
-    
+  }).catch(error => {
+    console.error('Error occurs when analyzing chapters:', error);
+
   }).then(v => {
     // save to disk
     let content = v.processed;
     let chapterList = v.chapterList;
-    console.log(v);
     let addPath = Path.resolve(appPath, bookTitle);
     let indexFilePath = Path.resolve(appPath, bookTitle + '-index.json');
     let bookmarkFilePath = Path.resolve(appPath, bookTitle + '-bookmark.json');
@@ -166,6 +185,7 @@ export function processLocal(path, bookTitle, lang, readPrefLang) {
 
     // write content into the folder just created
     for (var i in content) {
+      console.log(Path.resolve(addPath, chapterList[i]));
       fs.writeFileSync(Path.resolve(addPath, chapterList[i]), content[i]);
     }
 
@@ -173,8 +193,8 @@ export function processLocal(path, bookTitle, lang, readPrefLang) {
       bookPath: Path.resolve(appPath, bookTitle), 
       totalChapter: chapterList.length
     };
-  }).catch(err => {
-    console.error(err);
+  }).catch(error => {
+    console.error('Error occurs when saving file content', error);
   });
 }
 
@@ -206,7 +226,9 @@ export function readChapter(book, currentChapterOrder, index, offset) {
   var totalChapter = book.totalChapter;
   if (currentOrder >= totalChapter || currentOrder < 0) return null;
   var p = Path.resolve(book.bookPath, index.chapter[currentOrder]);
-  return String(fs.readFileSync(p));
+  var chapterContent = fs.readFileSync(p);
+  console.log(p);
+  return String(chapterContent);
 }
 
 export function objToFile(type, obj) {

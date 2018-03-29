@@ -74,10 +74,10 @@ const _gray3     = '#999999';
 const _gray4     = '#777777';
 const _gray5     = '#555555';
 const _ranbow    = 'linear-gradient(to right top, \
-                 rgb(255, 95, 95), rgb(255, 95, 95), \
-                 rgb(243, 161, 106), rgb(243, 218, 106), \
-                 rgb(136, 204, 130), rgb(72, 142, 235), \
-                 rgb(78, 97, 204))';
+                    rgb(255, 95, 95), rgb(255, 95, 95), \
+                    rgb(243, 161, 106), rgb(243, 218, 106), \
+                    rgb(136, 204, 130), rgb(72, 142, 235), \
+                    rgb(78, 97, 204))';
 
 const styles     = theme => ({
 // color setting for background color
@@ -216,11 +216,11 @@ class Setting extends React.Component {
   }
 
   render() {
-  // Div space, h1, h30, and w20
-    var h1  = (<div style={{height:  '1px', width: '100%'}}></div>);
-    var h30 = (<div style={{height: '30px', width: '100%'}}></div>);
-    var h80 = (<div style={{height: '80px', width: '100%'}}></div>);
-    var w20 = (<div style={{height:  '1px', width: '20px', display: 'inline-block'}}></div>);
+  // Div space, divh1, divh30, and divw20
+    var divh1  = (<div style={{height:  '1px', width: '100%'}}></div>);
+    var divh30 = (<div style={{height: '30px', width: '100%'}}></div>);
+    var divh80 = (<div style={{height: '80px', width: '100%'}}></div>);
+    var divw20 = (<div style={{height:  '1px', width: '20px', display: 'inline-block'}}></div>);
 
   // Component of background setting
     var bcbdefault   = this.getBCB(this.handleSetBCDefault,   _default,   this.props.classes.colorButtonBCDefault,   _light);
@@ -530,21 +530,21 @@ class Setting extends React.Component {
       <div className='setting-out container'>
         <div className='setting-main'>
           {autoLoad}
-          {h30}
+          {divh30}
           {programLanguage}
-          {h1}
+          {divh1}
           {readPrefLang}
-          {h30}
+          {divh30}
           {fontSize}
-          {h1}
+          {divh1}
           {lineHeight}
-          {h1}
+          {divh1}
           {backgroundColor}
-          {h1}
+          {divh1}
           {fontColor}
-          {h30}
+          {divh30}
           {preview}
-          {h80}
+          {divh80}
         </div>
       </div>
     );

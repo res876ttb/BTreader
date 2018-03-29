@@ -371,9 +371,9 @@ class Reading extends React.Component {
     content[2] = readChapter(this.props.book, cco, index,  1);
 
     var components = [
-      <ReadingContent key={idArr[0]} cid={idArr[0]} content={content[0]} chapters={index.chapter} currentChapterOrder={cco - 1} bookTitle={this.props.book.bookTitle} />,
-      <ReadingContent key={idArr[1]} cid={idArr[1]} content={content[1]} chapters={index.chapter} currentChapterOrder={cco} bookTitle={this.props.book.bookTitle} />,
-      <ReadingContent key={idArr[2]} cid={idArr[2]} content={content[2]} chapters={index.chapter} currentChapterOrder={cco + 1} bookTitle={this.props.book.bookTitle} />,      
+      <ReadingContent key={this.getRandomString()} cid={idArr[0]} content={content[0]} chapters={index.chapter} currentChapterOrder={cco - 1} bookTitle={this.props.book.bookTitle} />,
+      <ReadingContent key={this.getRandomString()} cid={idArr[1]} content={content[1]} chapters={index.chapter} currentChapterOrder={cco} bookTitle={this.props.book.bookTitle} />,
+      <ReadingContent key={this.getRandomString()} cid={idArr[2]} content={content[2]} chapters={index.chapter} currentChapterOrder={cco + 1} bookTitle={this.props.book.bookTitle} />,      
     ];
 
     this.setState({
@@ -485,7 +485,7 @@ class Reading extends React.Component {
 
     var prevComponent = (
       <ReadingContent 
-        key={newId}
+        key={Math.random().toString(36).substring(2)}
         cid={newId}
         content={this.state.nextContent}
         chapters={this.state.index.chapter}
@@ -538,15 +538,17 @@ class Reading extends React.Component {
     var ncco = this.state.firstChapterOrder - 1;
     var content = readChapter(
       this.props.book, 
-      this.state.currentChapterOrder,
+      ncco + 1,
       this.state.index, 
       -1
     );
     var newId = 'reading-content-' + String(5000 - nToBase);
 
+    console.log('>>> ', ncco, this.state.currentChapterOrder);
+
     var prevComponent = (
       <ReadingContent 
-        key={newId}
+        key={Math.random().toString(36).substring(2)}
         cid={newId}
         content={this.state.prevContent}
         chapters={this.state.index.chapter}
@@ -933,6 +935,11 @@ class Reading extends React.Component {
       this.props.dispatch(setCurBook(savingBook));
     }
   }
+
+// getRandomString
+  getRandomString() {
+    return Math.random().toString(36).substring(2);
+  }
 }
 
 export default connect (state => ({
@@ -948,19 +955,3 @@ export default connect (state => ({
   recentReading: state.library.recentReading,
   reload:        state.main.readingReload,
 }))(Reading);
-
-/* bookmark format:
-bookmark: [
-  {
-    currentChapter: string,
-    currentChapterOrder: number,
-    scrollTop: number,                                  // position in current chapter
-    scrollHeight: number,                               // scroll height of current chapter
-    content: string,                                    // preview in bookmark list
-    addTime: [year, month, day, hour, minute, second],  // for displaying in bookmark list
-    progress: number, // percentage of whole book, but not need to be store in bookmark. 
-                      // Calculated when bookmark is going go be rendered.
-  }, {
-  ...
-]
-*/
