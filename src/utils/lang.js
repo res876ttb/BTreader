@@ -109,7 +109,10 @@ export var lang = {
     },
     OnlineListItem: {
       inSerial: "連載中",
-      notInSerial: "已完結"
+      notInSerial: "已完結",
+      addToLibrary: "將本書加入書架",
+      showFullIntro: "顯示完整摘要",
+      showChapterList: "顯示章節列表",
     }
   }
 }

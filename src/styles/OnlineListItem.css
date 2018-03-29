@@ -1,5 +1,9 @@
 /* OnlineListItem.css */
 
+.no-focus:focus {
+  outline: none;
+}
+
 .oli-main {
   background-color: white;
   border-radius: 2px;
@@ -20,16 +24,24 @@
 .oli-booktitle {
   font-size: 18px;
   height: 27px;
+  width: 310px;
+  display: inline-block;
 
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
+.oli-menu {
+  display: inline-block;
+  width: 30px;
+  height: 27px;
+}
+
 .oli-author {
   font-size: 12px;
   color: rgb(113, 113, 113);
-  margin: 10px 0px 10px 0px;
+  margin: 0px 0px 10px 0px;
   height: 18px;
 
   overflow: hidden;
