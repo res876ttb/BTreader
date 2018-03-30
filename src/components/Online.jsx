@@ -65,6 +65,12 @@ class Online extends React.Component {
     };
   }
 
+  componentDidMount() {
+    this.getHTML('http://book100.com', response => {
+      console.log(response.documentElement.innerHTML);
+    });
+  }
+
   render() {
     let divw10 = (<div style={{width: '10px', display: 'inline-block'}}></div>);
     let divh10 = (<div style={{height: '10px'}}></div>);
@@ -160,6 +166,17 @@ class Online extends React.Component {
         inSerial={true}
       />,
     ];
+  }
+
+// getHTML
+  getHTML(url) {
+    var xhr = new XMLHttpRequest();
+
+    // get html
+    xhr.open('GET', url);
+    xhr.responseType = 'document';
+    xhr.send();
+    console.log(xhr);
   }
 
 /* handler */

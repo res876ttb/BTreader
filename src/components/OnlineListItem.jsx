@@ -73,7 +73,6 @@ class OnlineListItem extends React.Component {
               className='no-focus'
               size="small"
               onClick={this.handleMenuClick}
-              onContextMenu={this.handleMenuClick}
               style={{marginTop: '-20px'}}
             >
               <i className="fas fa-ellipsis-v" style={{fontSize: '16px'}}></i>
@@ -115,7 +114,6 @@ class OnlineListItem extends React.Component {
   }
 
   handleMenuClick(event) {
-    event.stopPropagation();
     if (this.state.menuOpen !== true) {
       this.setState({menuOpen: true, anchorEl: event.currentTarget, anchorReference: 'anchorEl'});
     } else {
