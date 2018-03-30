@@ -63,7 +63,7 @@ class OnlineListItem extends React.Component {
   render() {
     return (
       <div 
-        className='oli-main has-shadow'
+        className={'oli-main has-shadow' + (this.state.menuOpen ? ' oli-main-hover' : '')}
         onContextMenu={this.handleMainRightClick}
       >
         <div>
