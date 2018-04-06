@@ -16,6 +16,18 @@
 .online-list {
   margin-left: auto;
   margin-right: auto;
+  overflow: hidden;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.8, 0.1, 0.2, 0.9);
+}
+
+.online-serverbar-icon {
+  transition-duration: 300ms;
+  display: inline-block;
+}
+
+.online-serverbar-icon-down {
+  transform: rotate(180deg);
 }
 
 @media (min-width: 460px) {
@@ -34,4 +46,23 @@
   .online-list {
     width: 1290px;
   }
+}
+
+.online-serverbar {
+  background: white;
+  border-radius: 2px;
+  font-size: 20px;
+  color: rgb(140, 140, 140);
+  width: 550px;
+  height: 50px;
+  text-align: center;
+  line-height: 50px;
+  padding: 0px 30px;
+  margin: 0px auto 30px auto;
+}
+
+.online-controlbuttons {
+  position: fixed;
+  bottom: 0px;
+  width: 100%;
 }

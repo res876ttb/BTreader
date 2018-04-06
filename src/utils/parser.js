@@ -1,0 +1,138 @@
+// parser.js
+
+// packages
+const iconv = require('iconv-lite');
+
+// import database
+var {database} = require('./database.js');
+
+// constants
+const b = 'body';
+const c = 'children';
+
+/** 
+ * @function searchBook
+ * @description 
+ *   search book from server
+ * 
+ * @param keyword :string
+ * @param callback :function     
+ *  
+ * @return  
+ *   books: [
+ *     {
+ *       author,
+ *       bookTitle,
+ *       inSerial, 
+ *       intro, 
+ *       latestChapter,
+ *       url, 
+ *     }
+ *   ]
+ */
+export function searchBook(keyword, callback) {
+  for (let i in database.serverList) {
+    console.log(database.serverList[i]);
+    database[i].searchBook(keyword, ret => {
+      let result = {};
+      result[database.serverList[i]] = ret;
+      callback(result);
+    });
+  }
+  // var xhr = new XMLHttpRequest();
+  // var url = 'http://www.book100.com/data/search.aspx?key=' + escape(keyword);
+
+  // xhr.onload = function() {
+  //   var resultbase = xhr.responseXML[c][0][c][1][c][6][c][2][c][0][c][0][c][1][c][0][c][0][c][1][c][1][c][1][c][0][c][0][c][0][c][0][c][0];
+  //   if (resultbase === undefined) { // there are no book which matches to the keyword
+  //     console.log('There are no match book.');
+  //     return;
+  //   }
+  //   console.log(resultbase);
+  //   for (let i = 0; i < resultbase[c].length; i += 2) {
+  //     console.log(resultbase[c][i][c][0][c][3].innerText);
+  //     console.log(resultbase[c][i][c][0][c][2].href);
+  //   }
+  // }
+
+  // xhr.open('GET', url);
+  // xhr.responseType = 'document';
+  // xhr.send();
+}
+
+/** 
+ * @function getChapters
+ * @description 
+ *   get chapters by url only
+ * 
+ * @return // this is parameter of callback function
+ *   {
+ *     chapter: [
+ *       {
+ *         title: chapter title, string
+ *         local: if this chapter is stored in local storage, bool
+ *         link: url to the origin website of current chapter, stirng
+ *       }, {another chapter ...}
+ *     ],
+ *     intro: introduction of current book, string
+ *   }
+ */
+export function getChapters(url, callback) {
+  getHTML(url, htmlobj => {
+    if (url.match(/book100\.com/) !== null) {
+      getChaptersBook100_com(htmlobj, callback);
+    }
+  });
+}
+
+/** 
+ * @function getHTML
+ * @description 
+ *   get HTML content by url only
+ */
+function getHTML(url, callback) {
+  var xhr = new XMLHttpRequest();
+  xhr.onload = function() {
+    callback(xhr.responseXML);
+  }
+
+  // get html
+  xhr.open('GET', url);
+  xhr.responseType = 'document';
+  xhr.send();
+}
+
+/** 
+ * @function getChaptersBook100_com
+ * @description
+ *   get chapter list of website book100.com
+ */
+function getChaptersBook100_com(htmlobj, callback) {
+  // following structure is parser for book100.com
+  const _base = htmlobj[b][c][11][c][0][c][0][c][1];
+  const intro = _base[c][1][c][0][c][0][c][1][c][0][c][0][c][0][c][0][c][0][c][0][c][0][c][1][c][0][c][0][c][2][c][0][c][0][c][0].innerText;
+  const bookbase = _base[c][2][c][0][c][0][c][1][c][1][c][0];
+  const addEpisodeName = bookbase[c].length > 6;
+  let chapters = [];
+  for (let i = 1; i < bookbase[c].length; i += 5) {
+    let episodeTitle = bookbase[c][i + 2][c][0][c][0].innerText;
+    let chapterListBase = bookbase[c][i + 4][c][0][c][0][c][0];
+    for (let j = 0; j < chapterListBase[c].length; j += 1) {
+      for (let k = 0; k < chapterListBase[c][j][c].length; k += 1) {
+        let chapterComponent = chapterListBase[c][j][c][k][c][0];
+        if (chapterComponent === undefined) continue;
+        let link = chapterComponent['href'];
+        let chapter = (addEpisodeName ? (episodeTitle + ' ') : '') + chapterComponent.innerText;
+        chapters.push({
+          title: chapter,
+          local: false,
+          link: link,
+        });
+      }
+    }
+  }
+  callback({
+    chapter: chapters, 
+    intro: intro,
+  });
+}

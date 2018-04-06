@@ -94,8 +94,8 @@ class OnlineListItem extends React.Component {
           </div>
         </div>
 
-        <div className='oli-author'>{this.props.author}</div>
-        <div className='oli-intro'>{this.props.intro}</div>
+        <div className='oli-author'>{this.props.author === 'unknown' ? this.lang.unknown : this.props.author}</div>
+        <div className='oli-intro'>{this.props.intro === '' ? this.lang.none : this.props.intro}</div>
         <div style={{height: '24px'}}>
           <div style={{height: '24px', display: 'inline-block'}}>
             <div className='oli-latestChapter'>{this.props.latestChapter}</div>

@@ -1,9 +1,18 @@
 // wordProcess.js
 
+// import packages
 const {
   Traditionalized, 
   Simplized
 } = require('./chineseTranslator.js');
+
+export function getRandomString() {
+  return Math.random().toString(36).substring(2);
+}
+
+export function getLongRandomString() {
+  return Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+}
 
 export function isEmptyLine(line) {
   for (var i in line) {

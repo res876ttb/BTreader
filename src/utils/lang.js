@@ -106,6 +106,8 @@ export var lang = {
       bookTitle: "書名",
       author: "作者",
       searchFor: "分類",
+      noResult: "沒有找到符合關鍵字的結果",
+      recommendList: "隨便看看",
     },
     OnlineListItem: {
       inSerial: "連載中",
@@ -113,6 +115,8 @@ export var lang = {
       addToLibrary: "將本書加入書架",
       showFullIntro: "顯示完整摘要",
       showChapterList: "顯示章節列表",
+      unknown: "未知",
+      none: "無",
     }
   }
 }
