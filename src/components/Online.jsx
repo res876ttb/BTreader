@@ -207,7 +207,6 @@ class Online extends React.Component {
     getRecommendList(this.lang.recommendList, list => {
       let {result, listid, iconid} = this.getList(list);
       this.setState({recommendList: result, listIdList: [{listid: listid, iconid: iconid}], loadRecommendBookDone: true});
-      console.log(listid, iconid);
     });
   }
 
