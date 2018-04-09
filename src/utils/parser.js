@@ -39,25 +39,22 @@ export function searchBook(keyword, callback) {
       callback(result);
     });
   }
-  // var xhr = new XMLHttpRequest();
-  // var url = 'http://www.book100.com/data/search.aspx?key=' + escape(keyword);
+}
 
-  // xhr.onload = function() {
-  //   var resultbase = xhr.responseXML[c][0][c][1][c][6][c][2][c][0][c][0][c][1][c][0][c][0][c][1][c][1][c][1][c][0][c][0][c][0][c][0][c][0];
-  //   if (resultbase === undefined) { // there are no book which matches to the keyword
-  //     console.log('There are no match book.');
-  //     return;
-  //   }
-  //   console.log(resultbase);
-  //   for (let i = 0; i < resultbase[c].length; i += 2) {
-  //     console.log(resultbase[c][i][c][0][c][3].innerText);
-  //     console.log(resultbase[c][i][c][0][c][2].href);
-  //   }
-  // }
-
-  // xhr.open('GET', url);
-  // xhr.responseType = 'document';
-  // xhr.send();
+/**
+ * @function getRecommendList
+ * @description 
+ *  get recommend list by randomly selecting a server
+ * @param callback :function
+ * @callback @param list :object
+ */
+export function getRecommendList(lang, callback) {
+  let server = database[Object.keys(database.serverList)[Math.floor(Math.random() * Object.keys(database.serverList).length)]];
+  server.getRecommendList(ret => {
+    let result = {};
+    result[lang] = ret;
+    callback(result);
+  });
 }
 
 /** 

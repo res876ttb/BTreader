@@ -26,6 +26,7 @@ import OnlineListItem from './OnlineListItem.jsx';
 import {
   getChapters,
   searchBook,
+  getRecommendList,
 } from '../utils/parser.js';
 import { 
   getLongRandomString,
@@ -203,63 +204,10 @@ class Online extends React.Component {
 
 // getBooklists
   getRecommendList() {
-    let recommendId = getLongRandomString();
-    let iconid      = getLongRandomString();
-    this.setState({
-      recommendList: (
-        <div>
-          <div 
-            className='online-serverbar has-shadow'
-            onClick={() => {
-              let listout = document.getElementById(recommendId);
-              let icon = document.getElementById(iconid);
-              if (listout.style.height === '0px') {
-                listout.style.height = listout.scrollHeight.toString() + 'px';
-                icon.className = "online-serverbar-icon";
-              } else {
-                listout.style.height = '0px';
-                icon.className = "online-serverbar-icon online-serverbar-icon-down";
-              }
-            }}
-          >
-            {this.lang.recommendList}
-            <div style={{width: '15px', display: 'inline-block'}}></div>
-            <div id={iconid} className='online-serverbar-icon'>
-              <i className="fas fa-chevron-up" style={{fontSize: '16px', lineHeight: '50px'}}></i>
-            </div>
-          </div>
-          <div className='online-list' id={recommendId}>
-            <OnlineListItem
-              key='test1'
-              author='花田一路'
-              bookTitle='花甲男孩'
-              intro='自從出了車禍之後，花田一路意外獲得了陰陽眼，生活也因此產生了巨大的變化：成為幫助好兄弟們達成遺願的人'
-              latestChapter='第361章 助人亦利己'
-              url='https://www.easeread.com/HuaJiaNanHai/index.html'
-              inSerial={false}
-            />
-            <OnlineListItem
-              key='test2'
-              author='Microsoft Studio'
-              bookTitle='How to install Intel parallel compiler on your windows server'
-              intro='This book will help solve the problems of installing intel MPI on your windows server to achieve better performance.'
-              latestChapter='Chapter 13. Advance skills of solving scientific problem with parallel computing.'
-              url='https://www.github.com/Microsoft/How_to_install_Intel_parallel_compiler_on_your_windows_server/index.html'
-              inSerial={false}
-            />
-            <OnlineListItem
-              key='test3'
-              author='毛利小五郎'
-              bookTitle='名偵探的觀察日記'
-              intro='因意外事件而身體變回想學生樣貌的偵探高中生工藤新，目前寄宿在名偵探毛利小五郎家中。以為自己隱藏的天衣無縫的工藤新一，其真實身份早在某次事件中暴露給毛利小五郎…'
-              latestChapter='987. 茶杯中的倒影'
-              url='http://www03.eyny.com.tw/novels/charresses/4%23TW.html'
-              inSerial={true}
-            />
-          </div>
-        </div>), 
-      loadRecommendBookDone: true,
-      listIdList: [{listid: recommendId, iconid: iconid}],
+    getRecommendList(this.lang.recommendList, list => {
+      let {result, listid, iconid} = this.getList(list);
+      this.setState({recommendList: result, listIdList: [{listid: listid, iconid: iconid}], loadRecommendBookDone: true});
+      console.log(listid, iconid);
     });
   }
 
@@ -421,7 +369,6 @@ class Online extends React.Component {
 
   handleExpandAllList() {
     const {listIdList} = this.state;
-    console.log(listIdList);
     for (let i in listIdList) {
       let id = listIdList[i];
       let list = document.getElementById(id.listid);

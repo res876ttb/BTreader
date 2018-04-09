@@ -83,11 +83,9 @@ export var database = {
           callback([]);
           return;
         }
-        console.log(resultbase);
         for (let i = 0; i < resultbase[c].length; i += 2) {
           let bookUrl = resultbase[c][i][c][0][c][2].href;
           let bookTitle = resultbase[c][i][c][0][c][1].innerText;
-          let author = 
           papa.getBookIndexPage(bookUrl, base => {
             let intro = papa.getIntro(base);
             let author = papa.getAuthor(base);
@@ -114,29 +112,90 @@ export var database = {
       xhr.responseType = 'document';
       xhr.send();
     },
+    getRecommendList: function(callback) {
+      var xhr = new XMLHttpRequest();
+      var url = 'http://www.book100.com';
+      var ret = [];
+      var papa = this;
+      var counter = 0;
+
+      xhr.onload = function () {
+        let recommendBase = xhr.responseXML[c][0][c][1][c][4][c][0][c][0][c][0][c][0][c][0][c][1][c][1][c][1][c][0][c][0][c][0][c][0][c][0];
+        for (let i in recommendBase[c]) {
+          for (let j in recommendBase[c][i][c]) {
+            let book = recommendBase[c][i][c][j];
+            if (typeof(book) !== 'object') continue;
+            let url = book[c][0].href;
+            let bookTitle = book[c][0][c][2].innerText;
+            papa.getBookIndexPage(url, base => {
+              let intro = papa.getIntro(base);
+              let author = papa.getAuthor(base);
+              let inSerial = papa.getInSerial(base);
+              let latestChapter = papa.getLatestChapter(base);
+              if (author === bookTitle) author = 'unknown';
+              ret.push({
+                author: author,
+                bookTitle: bookTitle,
+                inSerial: inSerial,
+                intro: intro,
+                latestChapter: latestChapter,
+                url: url,
+              });
+              counter++;
+              if (counter == 10) {
+                callback(ret);
+              }
+            })
+          }
+        }
+      };
+      xhr.open('GET', url);
+      xhr.responseType = 'document';
+      xhr.send();
+    },
     getChapters: function(url) {
 
     },
     getIntro: function(obj) {
-      return obj[c][1][c][0][c][0][c][1][c][0][c][0][c][0][c][0][c][0][c][0][c][0][c][1][c][0][c][0][c][2][c][0][c][0][c][0].innerText;
+      try {
+        return obj[c][1][c][0][c][0][c][1][c][0][c][0][c][0][c][0][c][0][c][0][c][0][c][1][c][0][c][0][c][2][c][0][c][0][c][0].innerText;
+      } catch (error) {
+        console.error('Error occurs in getIntro of book100.com:', error);
+        return undefined;
+      }
     },
     getAuthor: function(obj) {
-      return obj[c][1][c][0][c][0][c][1][c][0][c][0][c][0][c][0][c][0][c][0][c][0][c][1][c][0][c][0][c][1][c][0][c][0].innerText;
+      try {
+        return obj[c][1][c][0][c][0][c][1][c][0][c][0][c][0][c][0][c][0][c][0][c][0][c][1][c][0][c][0][c][1][c][0][c][0].innerText;
+      } catch (error) {
+        console.error('Error occurs in getAuthor of book100.com:', error);
+        return 'unknown';
+      }
     },
     getInSerial: function(obj) {
-      return obj[c][1][c][0][c][0][c][1][c][0][c][0][c][0][c][0][c][0][c][0][c][0][c][1][c][0][c][0][c][0][c][1].innerText.match(/\[全本\]/) !== null;
+      try {
+        return obj[c][1][c][0][c][0][c][1][c][0][c][0][c][0][c][0][c][0][c][0][c][0][c][1][c][0][c][0][c][0][c][1].innerText.match(/\[全本\]/) !== null; 
+      } catch (error) {
+        console.error('Error occurs in getInSerial of book100.com:', error);
+        return true;
+      }
     },
     getLatestChapter: function(obj) {
-      let bookbase = obj[c][2][c][0][c][0][c][1][c][1][c][0];
-      let i = bookbase[c].length - 1;
-      let chapterListBase = bookbase[c][i][c][0][c][0][c][0];
-      for (let j = chapterListBase[c].length - 1; j >= 0; j--) {
-        if (chapterListBase[c][j][c][0] !== undefined) {
-          return chapterListBase[c][j][c][0].innerText;
+      try {
+        let bookbase = obj[c][2][c][0][c][0][c][1][c][1][c][0];
+        let i = bookbase[c].length - 1;
+        let chapterListBase = bookbase[c][i][c][0][c][0][c][0];
+        for (let j = chapterListBase[c].length - 1; j >= 0; j--) {
+          if (chapterListBase[c][j][c][0] !== undefined) {
+            return chapterListBase[c][j][c][0].innerText;
+          }
         }
+        console.error('Database error: cannot fetch latest chapter!');
+        return 'unknown';
+      } catch (error) {
+        console.error('Some unknown errors occur in getLatestChapter of book100.com:', error);
+        return undefined;
       }
-      console.error('Database error: cannot fetch latest chapter!');
-      return 'unknown';
     },
     getChapterContent: function() {
 
