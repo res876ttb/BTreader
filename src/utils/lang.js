@@ -119,6 +119,11 @@ export var lang = {
       none: "無",
       chapterListTitle: "目錄列表",
       intro: "摘要",
+      warningTitle: "您確定要直接閱讀本書嗎？",
+      warningContent: "在將書籍加到書架上之前閱讀書籍，所有紀錄都將不會被保存！您可以選擇在閱讀時將書籍加入到書架上，或著在閱讀中加入新的書籤時，也會自動幫您把書籍加到書架上喔！",
+      notShowAgain: "不再顯示",
+      cancel: "取消",
+      confirm: "確認",
     }
   }
 }

@@ -26,6 +26,7 @@ const initSettingState = {
   backgroundColor: 'rgb(212,212,212)',
   backgroundPath: '',
   readingPreferLanguage: 'auto', // auto, sc2tc, tc2sc, none
+  warningOnlineReading: true, // false if not show again is checked
 }
 
 const fontSizeArr = [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40];
@@ -105,6 +106,18 @@ export function setting (state = initSettingState, action) {
       return save({
         ...state,
         readingPreferLanguage: action.readingPreferLanguage,
+      });
+    case 'setting setOnlineReadingWarningNotShow':
+      console.log('Set warning for online reading to false');
+      return save({
+        ...state,
+        warningOnlineReading: false,
+      });
+    case 'setting resetAllWarning':
+      console.log('Reset all warning status to default');
+      return save({
+        ...state,
+        warningOnlineReading: true,
       });
     default:
       return state;
@@ -194,5 +207,17 @@ export function setReadingPreferLanguage(v) {
   return {
     type: 'setting setReadingPreferLanguage',
     readingPreferLanguage: v,
+  };
+}
+
+export function setOnlineReadingWarningNotShow() {
+  return {
+    type: 'setting setOnlineReadingWarningNotShow',
+  };
+}
+
+export function resetAllWarning() {
+  return {
+    type: 'setting resetAllWarning',
   };
 }

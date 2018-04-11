@@ -11,12 +11,16 @@ import Menu, { MenuItem } from 'material-ui/Menu';
 import Dialog, { DialogActions,DialogContent,DialogContentText,DialogTitle } from 'material-ui/Dialog';
 import Button from 'material-ui/Button';
 import { CircularProgress } from 'material-ui/Progress';
+import Checkbox from 'material-ui/Checkbox';
 
 // ============================================
 // import react components
 
 // ============================================
 // import react redux-action
+import {
+  setOnlineReadingWarningNotShow
+} from '../states/settingState.js';
 
 // ============================================
 // import apis
@@ -45,6 +49,7 @@ class OnlineListItem extends React.Component {
     latestChapter: PropTypes.string,
     url: PropTypes.string,
     inSerial: PropTypes.bool,
+    warningOnlineReading: PropTypes.bool,
   }
 
   constructor(props) {
@@ -57,6 +62,8 @@ class OnlineListItem extends React.Component {
     this.addToLibrary = this.addToLibrary.bind(this);
     this.showChapterList = this.showChapterList.bind(this);
     this.showFullIntro = this.showFullIntro.bind(this);
+    this.handleCancelWarning = this.handleCancelWarning.bind(this);
+    this.handleConfirmWarning = this.handleConfirmWarning.bind(this);
 
     this.state = {
       menuOpen: false,
@@ -72,6 +79,9 @@ class OnlineListItem extends React.Component {
       ifLoadChapterListDone: true, // false if being loading chapter list
       ifShowChapterList: false,
       ifShowFullIntro: false,
+      ifShowReadWarning: false,
+
+      notShowReadWarning: false,
     };
   }
 
@@ -122,7 +132,6 @@ class OnlineListItem extends React.Component {
           </div>
         </div>
 
-      {/* onclick event */}
         {/* Chapter List */}
         <Dialog
           open={this.state.ifShowChapterList}
@@ -152,6 +161,29 @@ class OnlineListItem extends React.Component {
             {this.props.intro}
           </div>
         </Dialog>
+
+        {/* Read warning */}
+        <Dialog
+          open={this.state.ifShowReadWarning && this.props.warningOnlineReading}
+          onClose={e=>{e.stopPropagation(); this.setState({ifShowReadWarning: false})}}
+          onClick={e=>e.stopPropagation()}
+          onContextMenu={e=>e.stopPropagation()}
+        >
+          <DialogTitle>{this.lang.warningTitle}</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              {this.lang.warningContent}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <div style={{fontSize: '14px', lineHeight: '48px', position: 'relative', left: '0px'}}>
+              <Checkbox checked={this.state.notShowReadWarning} onChange={()=>{this.setState({notShowReadWarning: !this.state.notShowReadWarning})}}/>
+              {this.lang.notShowAgain}
+            </div>
+            <Button className='nofocus' onClick={this.handleCancelWarning}>{this.lang.cancel}</Button>
+            <Button className='nofocus' onClick={this.handleConfirmWarning}>{this.lang.confirm}</Button>
+          </DialogActions>
+        </Dialog>
       </div>
     );
   }
@@ -177,6 +209,18 @@ class OnlineListItem extends React.Component {
     } else {
       this.setState({menuOpen: false, anchorPosition: mousePosition});
     }
+  }
+
+  handleCancelWarning() {
+    this.setState({ifShowReadWarning: false}); 
+    if (this.state.notShowReadWarning) 
+      this.props.dispatch(setOnlineReadingWarningNotShow());
+  }
+
+  handleConfirmWarning() {
+    this.setState({ifShowReadWarning: false});
+    if (this.state.notShowReadWarning) 
+      this.props.dispatch(setOnlineReadingWarningNotShow());
   }
 
   addToLibrary(event) {
@@ -219,7 +263,10 @@ class OnlineListItem extends React.Component {
     let list = [];
     r.map(v => {
       list.push((
-        <div key={getLongRandomString()}>
+        <div 
+          key={getLongRandomString()}
+          onClick={e=>{e.stopPropagation();this.setState({ifShowReadWarning: true});}}
+        >
           <div className='chapterlist-chapteritem-sep'></div>
           <div 
             className='oli-chapterlist-item'
@@ -236,4 +283,5 @@ class OnlineListItem extends React.Component {
 
 export default connect (state => ({
   langPack: state.main.langPack,
+  warningOnlineReading: state.setting.warningOnlineReading,
 }))(OnlineListItem);
