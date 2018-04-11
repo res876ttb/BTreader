@@ -91,3 +91,15 @@
   background-repeat: no-repeat;
   background-size: cover;
 }
+
+.has-hover:hover {
+  background-color: rgb(221, 221, 221);
+}
+
+.has-active:active {
+  background-color: rgb(202, 202, 202);
+}
+
+.has-transition200 {
+  transition-duration: 200ms;
+}

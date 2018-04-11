@@ -92,6 +92,8 @@ export var lang = {
       checkRetranslate: "翻譯目前書架上的所有書籍？",
       checkRetranslateContent: "這會重新翻譯您書架上的所有書，這需要花上一段時間。注意，翻譯期間請勿關閉 BTreader。",
       retransDescription: "若您選擇自動，BTreader 會根據您目前使用的語言翻譯新加入的書籍",
+      resetWarning: "重設所有提示",
+      confirmResetWarning: "確定要重設所有提示？",
     },
     BookmarkList: {
       title: "書籤列表",

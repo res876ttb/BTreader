@@ -29,6 +29,7 @@ import {
   setBackgroundColor,
   setBackgroundImage,
   setReadingPreferLanguage,
+  resetAllWarning,
 } from '../states/settingState.js';
 import { 
   updateAllBooks,
@@ -116,6 +117,11 @@ const styles     = theme => ({
   colorButtonFCCustom: {background: _ranbow, '&:hover': {background: _ranbow}},
 });
 
+const divh1  = (<div style={{height:  '1px', width: '100%'}}></div>);
+const divh30 = (<div style={{height: '30px', width: '100%'}}></div>);
+const divh80 = (<div style={{height: '80px', width: '100%'}}></div>);
+const divw20 = (<div style={{height:  '1px', width: '20px', display: 'inline-block'}}></div>);
+
 // ============================================
 // react components
 class Setting extends React.Component {
@@ -189,6 +195,7 @@ class Setting extends React.Component {
       backgroundColor: '#00000',
       fontColor: '#000000',
       askTransAll: false,
+      showResetWarning: false,
     };
   }
 
@@ -216,12 +223,6 @@ class Setting extends React.Component {
   }
 
   render() {
-  // Div space, divh1, divh30, and divw20
-    var divh1  = (<div style={{height:  '1px', width: '100%'}}></div>);
-    var divh30 = (<div style={{height: '30px', width: '100%'}}></div>);
-    var divh80 = (<div style={{height: '80px', width: '100%'}}></div>);
-    var divw20 = (<div style={{height:  '1px', width: '20px', display: 'inline-block'}}></div>);
-
   // Component of background setting
     var bcbdefault   = this.getBCB(this.handleSetBCDefault,   _default,   this.props.classes.colorButtonBCDefault,   _light);
     var bcbwhite     = this.getBCB(this.handleSetBCWhite,     _white,     this.props.classes.colorButtonBCWhite,     _light);
@@ -524,12 +525,35 @@ class Setting extends React.Component {
       </div>
     );
 
+    var resetWarning = (
+      <div>
+        <div className='setting-block has-shadow has-hover has-active has-transition200'
+          onClick={()=>this.setState({showResetWarning: true})}
+        >
+          <div className='setting-inline-text' style={{paddingLeft: '14px', flex: 'none'}}>
+            {this.lang.resetWarning}
+          </div>
+        </div>
+        <Dialog
+          open={this.state.showResetWarning}
+          onClose={()=>this.setState({showResetWarning: false})}
+        >
+          <DialogTitle>{this.lang.confirmResetWarning}</DialogTitle>
+          <DialogActions>
+            <Button onClick={()=>this.setState({showResetWarning: false})}>{this.lang.cancel}</Button>
+            <Button onClick={()=>{this.setState({showResetWarning: false});this.props.dispatch(resetAllWarning())}}>{this.lang.confirm}</Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    )
 
   // return render content
     return (
       <div className='setting-out container'>
         <div className='setting-main'>
           {autoLoad}
+          {divh30}
+          {resetWarning}
           {divh30}
           {programLanguage}
           {divh1}

@@ -164,7 +164,7 @@ class OnlineListItem extends React.Component {
 
         {/* Read warning */}
         <Dialog
-          open={this.state.ifShowReadWarning && this.props.warningOnlineReading}
+          open={this.state.ifShowReadWarning}
           onClose={e=>{e.stopPropagation(); this.setState({ifShowReadWarning: false})}}
           onClick={e=>e.stopPropagation()}
           onContextMenu={e=>e.stopPropagation()}
@@ -215,12 +215,18 @@ class OnlineListItem extends React.Component {
     this.setState({ifShowReadWarning: false}); 
     if (this.state.notShowReadWarning) 
       this.props.dispatch(setOnlineReadingWarningNotShow());
+    setTimeout(() => {
+      this.setState({notShowReadWarning: false});
+    }, 300);
   }
 
   handleConfirmWarning() {
     this.setState({ifShowReadWarning: false});
     if (this.state.notShowReadWarning) 
       this.props.dispatch(setOnlineReadingWarningNotShow());
+    setTimeout(() => {
+      this.setState({notShowReadWarning: false});
+    }, 300);
   }
 
   addToLibrary(event) {
@@ -265,7 +271,7 @@ class OnlineListItem extends React.Component {
       list.push((
         <div 
           key={getLongRandomString()}
-          onClick={e=>{e.stopPropagation();this.setState({ifShowReadWarning: true});}}
+          onClick={e=>{e.stopPropagation();if (this.props.warningOnlineReading)this.setState({ifShowReadWarning: true});}}
         >
           <div className='chapterlist-chapteritem-sep'></div>
           <div 
