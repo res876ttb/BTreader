@@ -57,6 +57,22 @@ export function getRecommendList(lang, callback) {
   });
 }
 
+/**
+ * @function getChapterList
+ * @description
+ *  Get chapter list from server. The server selected is depend on the url you give to this function.
+ * 
+ * @param url
+ * @param callback
+ * @callback @param list :array
+ *  [{chapterTitle, url, false}, {...}, ...]
+ */
+export function getChapterList(url, callback) {
+  if (url.match(/book100\.com/) !== null) {
+    database['book100.com'].getChapters(url, callback);
+  }
+}
+
 /** 
  * @function getChapters
  * @description 

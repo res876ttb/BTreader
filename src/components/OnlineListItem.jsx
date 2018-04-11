@@ -8,6 +8,9 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import IconButton from 'material-ui/IconButton';
 import Menu, { MenuItem } from 'material-ui/Menu';
+import Dialog, { DialogActions,DialogContent,DialogContentText,DialogTitle } from 'material-ui/Dialog';
+import Button from 'material-ui/Button';
+import { CircularProgress } from 'material-ui/Progress';
 
 // ============================================
 // import react components
@@ -17,6 +20,12 @@ import Menu, { MenuItem } from 'material-ui/Menu';
 
 // ============================================
 // import apis
+import {
+  getChapterList
+} from '../utils/parser.js';
+import {
+  getLongRandomString
+} from '../utils/wordProcess.js';
 
 // ============================================
 // import css file
@@ -51,12 +60,18 @@ class OnlineListItem extends React.Component {
 
     this.state = {
       menuOpen: false,
+      chapterListContent: undefined,
+      _chapter: undefined,
       anchorEl: null,
       anchorReference: 'anchorEl', // anchorEl, anchorPosition
       anchorPosition: {
         x: 0,
         y: 0,
       },
+
+      ifLoadChapterListDone: true, // false if being loading chapter list
+      ifShowChapterList: false,
+      ifShowFullIntro: false,
     };
   }
 
@@ -65,6 +80,7 @@ class OnlineListItem extends React.Component {
       <div 
         className={'oli-main has-shadow' + (this.state.menuOpen ? ' oli-main-hover' : '')}
         onContextMenu={this.handleMainRightClick}
+        onClick={()=>{this.getChapterList()}}
       >
         <div>
           <div className='oli-booktitle'>{this.props.bookTitle}</div>
@@ -83,13 +99,11 @@ class OnlineListItem extends React.Component {
               anchorPosition={{top: this.state.anchorPosition.y, left: this.state.anchorPosition.x}}
               open={this.state.menuOpen}
               onClose={this.handleMenuClick}
+              onClick={e=>e.stopPropagation()}
             >
               <MenuItem onClick={this.addToLibrary}>{this.lang.addToLibrary}</MenuItem>
               <MenuItem onClick={this.showChapterList}>{this.lang.showChapterList}</MenuItem>
-              {this.props.intro !== '' ? 
-                <MenuItem onClick={this.showFullIntro}>{this.lang.showFullIntro}</MenuItem> : 
-                <MenuItem onClick={this.showFullIntro} disable>{this.lang.showFullIntro}</MenuItem>
-              }
+              <MenuItem onClick={this.showFullIntro} disabled={this.props.intro !== '' ? false : true}>{this.lang.showFullIntro}</MenuItem>
             </Menu>
           </div>
         </div>
@@ -108,12 +122,43 @@ class OnlineListItem extends React.Component {
           </div>
         </div>
 
-        {/* onclick event */}
+      {/* onclick event */}
+        {/* Chapter List */}
+        <Dialog
+          open={this.state.ifShowChapterList}
+          onClose={e=>{e.stopPropagation();this.setState({ifShowChapterList:false});}}
+        >
+          <DialogTitle>{this.lang.chapterListTitle}</DialogTitle>
+          {
+            this.state.ifLoadChapterListDone === false 
+            ? <div style={{textAlign: 'center'}}><CircularProgress/></div> 
+            : null
+          }
+          <div className='oli-chapterlist'>
+            {this.state.chapterListContent}
+          </div>
+          <div style={{height: '35px', width: '100%'}}></div>
+        </Dialog>
+
+        {/* Introduction */}
+        <Dialog
+          open={this.state.ifShowFullIntro}
+          onClose={e=>{e.stopPropagation();this.setState({ifShowFullIntro:false});}}
+          onClick={e=>e.stopPropagation()}
+          onContextMenu={e=>e.stopPropagation()}
+        >
+          <DialogTitle>{this.lang.intro}</DialogTitle>
+          <div className='oli-fullintro'>
+            {this.props.intro}
+          </div>
+        </Dialog>
       </div>
     );
   }
 
   handleMenuClick(event) {
+    if (event)
+      event.stopPropagation();
     if (this.state.menuOpen !== true) {
       this.setState({menuOpen: true, anchorEl: event.currentTarget, anchorReference: 'anchorEl'});
     } else {
@@ -122,6 +167,7 @@ class OnlineListItem extends React.Component {
   }
 
   handleMainRightClick(event) {
+    if (this.state.ifShowChapterList === true) return;
     let mousePosition = {
       x: event.clientX,
       y: event.clientY,
@@ -133,19 +179,58 @@ class OnlineListItem extends React.Component {
     }
   }
 
-  addToLibrary() {
+  addToLibrary(event) {
+    if (event) event.stopPropagation();
     console.log('Add "', this.props.bookTitle, '"to library');
-    this.handleMenuClick();
+    this.handleMenuClick(event);
   }
 
-  showChapterList() {
+  showChapterList(event) {
+    if (event) event.stopPropagation();
     console.log('Show chapter list');
-    this.handleMenuClick();
+    this.handleMenuClick(event);
+    this.getChapterList();
   }
 
-  showFullIntro() {
+  showFullIntro(event) {
+    if (event) event.stopPropagation();
     console.log('Show full introduction of "', this.props.bookTitle, '"');
-    this.handleMenuClick();
+    this.handleMenuClick(event);
+    this.setState({ifShowFullIntro: true});
+  }
+
+  getChapterList() {
+    this.setState({ifShowChapterList: true, ifLoadChapterListDone: false});
+    if (this.state.chapterListContent === undefined) {
+      getChapterList(this.props.url, r => {
+        let chapterListContent = this.getChapterListContent(r);
+        this.setState({
+          ifLoadChapterListDone: true, 
+          chapterListContent: chapterListContent,
+          _chapter: r,
+        });
+      });
+    } else {
+      this.setState({ifLoadChapterListDone: true});
+    }
+  }
+
+  getChapterListContent(r) {
+    let list = [];
+    r.map(v => {
+      list.push((
+        <div key={getLongRandomString()}>
+          <div className='chapterlist-chapteritem-sep'></div>
+          <div 
+            className='oli-chapterlist-item'
+            onClick={() => {console.log(v.link)}}
+          >
+            {v.title}
+          </div>
+        </div>
+      ));
+    });
+    return list;
   }
 }
 

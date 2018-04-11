@@ -117,6 +117,8 @@ export var lang = {
       showChapterList: "顯示章節列表",
       unknown: "未知",
       none: "無",
+      chapterListTitle: "目錄列表",
+      intro: "摘要",
     }
   }
 }

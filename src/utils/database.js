@@ -87,10 +87,10 @@ export var database = {
           let bookUrl = resultbase[c][i][c][0][c][2].href;
           let bookTitle = resultbase[c][i][c][0][c][1].innerText;
           papa.getBookIndexPage(bookUrl, base => {
-            let intro = papa.getIntro(base);
-            let author = papa.getAuthor(base);
-            let inSerial = papa.getInSerial(base);
-            let latestChapter = papa.getLatestChapter(base);
+            let intro = papa.getIntro(base, bookUrl);
+            let author = papa.getAuthor(base, bookUrl);
+            let inSerial = papa.getInSerial(base, bookUrl);
+            let latestChapter = papa.getLatestChapter(base, bookUrl);
             if (author === bookTitle) author = 'unknown';
             ret.push({
               author: author,
@@ -125,13 +125,13 @@ export var database = {
           for (let j in recommendBase[c][i][c]) {
             let book = recommendBase[c][i][c][j];
             if (typeof(book) !== 'object') continue;
-            let url = book[c][0].href;
+            let bookUrl = book[c][0].href;
             let bookTitle = book[c][0][c][2].innerText;
-            papa.getBookIndexPage(url, base => {
-              let intro = papa.getIntro(base);
-              let author = papa.getAuthor(base);
-              let inSerial = papa.getInSerial(base);
-              let latestChapter = papa.getLatestChapter(base);
+            papa.getBookIndexPage(bookUrl, base => {
+              let intro = papa.getIntro(base, bookUrl);
+              let author = papa.getAuthor(base, bookUrl);
+              let inSerial = papa.getInSerial(base, bookUrl);
+              let latestChapter = papa.getLatestChapter(base, bookUrl);
               if (author === bookTitle) author = 'unknown';
               ret.push({
                 author: author,
@@ -139,7 +139,7 @@ export var database = {
                 inSerial: inSerial,
                 intro: intro,
                 latestChapter: latestChapter,
-                url: url,
+                url: bookUrl,
               });
               counter++;
               if (counter == 10) {
@@ -153,48 +153,86 @@ export var database = {
       xhr.responseType = 'document';
       xhr.send();
     },
-    getChapters: function(url) {
-
+    getChapters: function(url, callback) {
+      this.getBookIndexPage(url, base => {
+        const bookbase = base[c][2][c][0][c][0][c][1][c][1][c][0];
+        const addEpisodeName = bookbase[c].length > 6;
+        let chapters = [];
+        for (let i = 1; i < bookbase[c].length; i += 5) {
+          let episodeTitle = bookbase[c][i + 2][c][0][c][0].innerText;
+          let chapterListBase = bookbase[c][i + 4][c][0][c][0][c][0];
+          for (let j = 0; j < chapterListBase[c].length; j += 1) {
+            for (let k = 0; k < chapterListBase[c][j][c].length; k += 1) {
+              let chapterComponent = chapterListBase[c][j][c][k][c][0];
+              if (chapterComponent === undefined) continue;
+              let link = chapterComponent['href'];
+              let chapter = (addEpisodeName ? (episodeTitle + ' ') : '') + chapterComponent.innerText;
+              chapters.push({
+                title: chapter,
+                local: false,
+                link: link,
+              });
+            }
+          }
+        }
+        callback(chapters);
+      });
     },
-    getIntro: function(obj) {
+    getIntro: function(obj, url) {
       try {
         return obj[c][1][c][0][c][0][c][1][c][0][c][0][c][0][c][0][c][0][c][0][c][0][c][1][c][0][c][0][c][2][c][0][c][0][c][0].innerText;
       } catch (error) {
-        console.error('Error occurs in getIntro of book100.com:', error);
+        console.error('Error occurs in getIntro of book100.com when parsing', url, error);
         return undefined;
       }
     },
-    getAuthor: function(obj) {
+    getAuthor: function(obj, url) {
       try {
         return obj[c][1][c][0][c][0][c][1][c][0][c][0][c][0][c][0][c][0][c][0][c][0][c][1][c][0][c][0][c][1][c][0][c][0].innerText;
       } catch (error) {
-        console.error('Error occurs in getAuthor of book100.com:', error);
+        console.error('Error occurs in getAuthor of book100.com when parsing', url, error);
         return 'unknown';
       }
     },
-    getInSerial: function(obj) {
+    getInSerial: function(obj, url) {
       try {
         return obj[c][1][c][0][c][0][c][1][c][0][c][0][c][0][c][0][c][0][c][0][c][0][c][1][c][0][c][0][c][0][c][1].innerText.match(/\[全本\]/) !== null; 
       } catch (error) {
-        console.error('Error occurs in getInSerial of book100.com:', error);
+        console.error('Error occurs in getInSerial of book100.com when parsing', url, error);
         return true;
       }
     },
-    getLatestChapter: function(obj) {
+    getLatestChapter: function(obj, url) {
       try {
         let bookbase = obj[c][2][c][0][c][0][c][1][c][1][c][0];
         let i = bookbase[c].length - 1;
         let chapterListBase = bookbase[c][i][c][0][c][0][c][0];
         for (let j = chapterListBase[c].length - 1; j >= 0; j--) {
-          if (chapterListBase[c][j][c][0] !== undefined) {
-            return chapterListBase[c][j][c][0].innerText;
+          for (let k = chapterListBase[c][j][c].length - 1; k >= 0; k--) {
+            if (chapterListBase[c][j][c][k] !== undefined && chapterListBase[c][j][c][k].innerText !== '') {
+              return chapterListBase[c][j][c][k].innerText;
+            }
           }
         }
         console.error('Database error: cannot fetch latest chapter!');
         return 'unknown';
       } catch (error) {
-        console.error('Some unknown errors occur in getLatestChapter of book100.com:', error);
-        return undefined;
+        try {
+          let bookbase = obj[c][2][c][0][c][0][c][1][c][1][c][0];
+          console.log(bookbase);
+          let i = bookbase[c].length - 6;
+          let chapterListBase = bookbase[c][i][c][0][c][0][c][0];
+          for (let j = chapterListBase[c].length - 1; j >= 0; j--) {
+            for (let k = chapterListBase[c][j][c].length - 1; k >= 0; k--) {
+              if (chapterListBase[c][j][c][k] !== undefined && chapterListBase[c][j][c][k].innerText !== '') {
+                return chapterListBase[c][j][c][k].innerText;
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Some unknown errors occur in getLatestChapter of book100.com when parsing', url, error);
+          return undefined;
+        }
       }
     },
     getChapterContent: function() {
